@@ -1,0 +1,3294 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>NEON BREACH // Cyber-Parkour Enclosure Escape</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-cyan: #00f3ff;
+      --neon-magenta: #ff007f;
+      --neon-lime: #b8ff00;
+      --neon-amber: #ffaa00;
+      --bg-dark: #060711;
+    }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #05050d;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+    .font-cyber {
+      font-family: 'Orbitron', sans-serif;
+    }
+    .font-mono-tech {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .cyber-panel {
+      background: linear-gradient(145deg, rgba(12, 16, 34, 0.94), rgba(7, 9, 20, 0.97));
+      border: 1px solid rgba(0, 243, 255, 0.38);
+      box-shadow: 0 0 28px rgba(0, 243, 255, 0.14), inset 0 0 15px rgba(0, 243, 255, 0.05);
+      backdrop-filter: blur(12px);
+    }
+    .cyber-panel-pink {
+      background: linear-gradient(145deg, rgba(28, 10, 28, 0.94), rgba(12, 6, 18, 0.97));
+      border: 1px solid rgba(255, 0, 127, 0.42);
+      box-shadow: 0 0 28px rgba(255, 0, 127, 0.16), inset 0 0 15px rgba(255, 0, 127, 0.06);
+      backdrop-filter: blur(12px);
+    }
+    .cyber-btn {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    }
+    .cyber-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.15);
+    }
+    .cyber-btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .scanlines {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.22) 50%,
+        rgba(0, 0, 0, 0.22)
+      );
+      background-size: 100% 4px;
+    }
+    .text-glow-cyan {
+      text-shadow: 0 0 10px rgba(0, 243, 255, 0.7), 0 0 20px rgba(0, 243, 255, 0.35);
+    }
+    .text-glow-pink {
+      text-shadow: 0 0 10px rgba(255, 0, 127, 0.7), 0 0 20px rgba(255, 0, 127, 0.35);
+    }
+    .text-glow-lime {
+      text-shadow: 0 0 10px rgba(184, 255, 0, 0.7), 0 0 20px rgba(184, 255, 0, 0.35);
+    }
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(0, 243, 255, 0.4); }
+      50% { border-color: rgba(0, 243, 255, 0.9); }
+    }
+    .animate-Border {
+      animation: pulse-border 2s infinite;
+    }
+  </style>
+</head>
+<body class="relative w-full h-full flex flex-col bg-[#05050d] select-none overflow-hidden">
+
+  <!-- TOP HUD BAR -->
+  <header class="relative z-20 flex items-center justify-between px-3 sm:px-5 py-2 bg-[#070916]/90 border-b border-cyan-500/30 backdrop-blur-md">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_#00f3ff] animate-pulse"></div>
+      <span class="font-cyber font-extrabold tracking-wider text-sm sm:text-base text-cyan-300 text-glow-cyan">NEON BREACH</span>
+      <span id="hudSectorBadge" class="hidden sm:inline-block font-mono-tech text-[11px] px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-400/40 text-cyan-200">
+        RING 01 // CRYO-CELL
+      </span>
+      <span id="hudEnclosureLocks" class="hidden lg:inline-block font-mono-tech text-[11px] px-2 py-0.5 rounded bg-lime-500/15 border border-lime-400/40 text-lime-300" title="Complete all 4 Rings to escape the Enclosure">
+        ENCLOSURE LOCKS: 0/4
+      </span>
+    </div>
+
+    <!-- Live Escape Telemetry -->
+    <div id="hudTelemetry" class="flex items-center gap-3 sm:gap-6 text-xs font-mono-tech">
+      <!-- Threat Proximity -->
+      <div class="flex items-center gap-1.5" title="Enforcer Drone Distance">
+        <span class="text-pink-400 font-bold uppercase hidden md:inline">PURSUIT:</span>
+        <div class="w-16 sm:w-24 h-2.5 bg-slate-900 rounded-sm overflow-hidden border border-pink-500/40 p-[1px]">
+          <div id="hudPursuitBar" class="h-full bg-gradient-to-r from-pink-600 via-rose-500 to-amber-400 transition-all duration-100" style="width: 25%"></div>
+        </div>
+      </div>
+
+      <!-- Escape Progress / Security Nodes -->
+      <div class="flex items-center gap-1.5" title="Decryption Keys Hacked">
+        <span class="text-cyan-300 font-bold">KEYS:</span>
+        <div id="hudKeysContainer" class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-xs border border-cyan-400 bg-cyan-400/20 inline-block"></span>
+          <span class="w-2.5 h-2.5 rounded-xs border border-cyan-400 bg-cyan-400/20 inline-block"></span>
+          <span class="w-2.5 h-2.5 rounded-xs border border-cyan-400 bg-cyan-400/20 inline-block"></span>
+        </div>
+      </div>
+
+      <!-- Sandevistan Overclock Charge -->
+      <div class="flex items-center gap-1.5" title="Overclock Surge Energy">
+        <span class="text-lime-300 font-bold hidden sm:inline">SURGE:</span>
+        <div class="w-14 sm:w-20 h-2.5 bg-slate-900 rounded-sm overflow-hidden border border-lime-400/40 p-[1px]">
+          <div id="hudSurgeBar" class="h-full bg-gradient-to-r from-emerald-400 to-lime-300 transition-all duration-75" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <!-- Data Shards & Score -->
+      <div class="flex items-center gap-2">
+        <span class="text-amber-300 font-bold">₿ <span id="hudShards">0</span></span>
+        <span class="text-slate-400 hidden sm:inline">|</span>
+        <span class="text-cyan-200 hidden sm:inline"><span id="hudDistance">0</span>m</span>
+      </div>
+    </div>
+
+    <!-- Action Controls -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <button id="btnOpenRig" type="button" class="px-2.5 py-1 text-xs font-mono-tech rounded bg-fuchsia-500/15 hover:bg-fuchsia-500/30 border border-fuchsia-400/50 text-fuchsia-200 transition">
+        RIG LAB
+      </button>
+      <button id="btnPauseToggle" type="button" class="px-2.5 py-1 text-xs font-mono-tech rounded bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 transition">
+        PAUSE
+      </button>
+      <button id="btnMuteToggle" type="button" class="px-2.5 py-1 text-xs font-mono-tech rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 transition" title="Toggle Synth Audio">
+        SFX: ON
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT & CANVAS -->
+  <main id="canvasContainer" class="relative flex-1 w-full h-full overflow-hidden bg-[#04050c]">
+    <canvas id="gameCanvas" class="block w-full h-full"></canvas>
+
+    <!-- Subtle CRT Scanline Overlay -->
+    <div class="scanlines pointer-events-none absolute inset-0 z-10 opacity-25"></div>
+
+    <!-- Extraction Progress Bar along top of canvas -->
+    <div class="absolute top-0 left-0 right-0 h-1.5 bg-slate-900/80 z-20">
+      <div id="hudProgressLine" class="h-full bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-lime-400 shadow-[0_0_10px_#00f3ff] transition-all duration-100" style="width: 0%"></div>
+    </div>
+
+    <!-- Floating Trick / Parkour Combo Banner -->
+    <div id="trickFeed" class="pointer-events-none absolute top-5 left-4 z-20 flex flex-col gap-1 transition-all duration-200 opacity-0">
+      <div class="flex items-center gap-2">
+        <span id="trickName" class="font-cyber text-sm sm:text-base font-extrabold text-lime-300 text-glow-lime tracking-wider">KONG VAULT</span>
+        <span id="trickMult" class="font-mono-tech text-xs px-1.5 py-0.5 rounded bg-fuchsia-600/80 text-white font-bold">x2 FLOW</span>
+      </div>
+      <span id="trickSub" class="font-mono-tech text-[11px] text-cyan-200/90">+150 STYLE // +15% SURGE</span>
+    </div>
+
+    <!-- Floating Breach Prompt when near Security Terminal -->
+    <div id="breachPrompt" class="pointer-events-none hidden absolute top-14 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded bg-cyan-950/90 border border-cyan-400 text-cyan-200 font-mono-tech text-xs shadow-[0_0_15px_rgba(0,243,255,0.4)] animate-bounce">
+      [E] / TAP PULSE TO BREACH LASER GRID
+    </div>
+
+    <!-- TOUCH / ON-SCREEN CONTROLS (Always accessible on mobile & desktop) -->
+    <div id="onScreenControls" class="absolute bottom-3 left-3 right-3 z-20 flex items-end justify-between pointer-events-none">
+      <!-- Left Hand: Slide & Hack Pulse -->
+      <div class="flex items-center gap-2 pointer-events-auto">
+        <button id="btnTouchSlide" type="button" class="cyber-btn active:scale-95 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-slate-900/85 hover:bg-slate-800/90 border border-cyan-400/60 text-cyan-300 font-cyber text-xs sm:text-sm font-bold shadow-[0_0_15px_rgba(0,243,255,0.2)]">
+          ▼ SLIDE <span class="hidden sm:inline text-[10px] font-mono-tech text-slate-400">[S/↓]</span>
+        </button>
+        <button id="btnTouchPulse" type="button" class="cyber-btn active:scale-95 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-fuchsia-950/85 hover:bg-fuchsia-900/90 border border-fuchsia-400/60 text-fuchsia-300 font-cyber text-xs sm:text-sm font-bold shadow-[0_0_15px_rgba(255,0,127,0.25)]">
+          ⚡ EMP HACK <span class="hidden sm:inline text-[10px] font-mono-tech text-fuchsia-200/70">[E]</span>
+        </button>
+      </div>
+
+      <!-- Center hint on desktop -->
+      <div class="hidden lg:flex items-center gap-3 px-3 py-1 rounded-full bg-slate-950/75 border border-slate-800 text-[11px] font-mono-tech text-slate-400">
+        <span><b class="text-cyan-300">W / ↑ / SPACE</b> VAULT & FLIP</span>
+        <span>•</span>
+        <span><b class="text-cyan-300">S / ↓</b> POWER SLIDE</span>
+        <span>•</span>
+        <span><b class="text-lime-300">SHIFT / D / →</b> PHASE SURGE</span>
+        <span>•</span>
+        <span><b class="text-fuchsia-300">E</b> EMP BREACH</span>
+      </div>
+
+      <!-- Right Hand: Overclock Surge & Parkour Jump/Vault -->
+      <div class="flex items-center gap-2 pointer-events-auto">
+        <button id="btnTouchSurge" type="button" class="cyber-btn active:scale-95 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-lime-950/85 hover:bg-lime-900/90 border border-lime-400/70 text-lime-300 font-cyber text-xs sm:text-sm font-bold shadow-[0_0_15px_rgba(184,255,0,0.25)]">
+          ▶ SURGE <span class="hidden sm:inline text-[10px] font-mono-tech text-lime-200/70">[SHIFT]</span>
+        </button>
+        <button id="btnTouchJump" type="button" class="cyber-btn active:scale-95 px-4 py-2.5 sm:px-5 sm:py-3 bg-cyan-950/90 hover:bg-cyan-900/95 border-2 border-cyan-400 text-cyan-200 font-cyber text-xs sm:text-sm font-extrabold shadow-[0_0_20px_rgba(0,243,255,0.35)]">
+          ▲ JUMP / VAULT <span class="hidden sm:inline text-[10px] font-mono-tech text-cyan-300">[SPACE]</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- START / ENCLOSURE LEVEL SELECT OVERLAY MODAL -->
+    <div id="menuModal" class="absolute inset-0 z-30 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md">
+      <div class="cyber-panel w-full max-w-3xl rounded-lg p-4 sm:p-6 md:p-7 flex flex-col gap-3.5 max-h-[92vh] overflow-y-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-500/30 pb-3">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 text-[10px] font-mono-tech font-bold bg-pink-500/20 border border-pink-500/50 text-pink-300 rounded">AETHER-9 BIODOME ENCLOSURE</span>
+              <span id="menuEnclosureStatus" class="px-2 py-0.5 text-[10px] font-mono-tech font-bold bg-cyan-500/20 border border-cyan-400/50 text-cyan-200 rounded">ENCLOSURE LOCKS BREACHED: 0 / 4</span>
+            </div>
+            <h1 class="font-cyber text-2xl sm:text-3xl md:text-4xl font-black tracking-wider text-white mt-1">
+              NEON <span class="text-cyan-400 text-glow-cyan">BREACH</span> : THE ENCLOSURE
+            </h1>
+          </div>
+          <div class="flex items-center gap-3 bg-slate-900/90 border border-amber-400/40 px-3 py-1.5 rounded self-start sm:self-center">
+            <span class="text-xs font-mono-tech text-slate-300">DATA SHARDS:</span>
+            <span class="font-mono-tech font-bold text-sm text-amber-300">₿ <span id="menuShardsCount">0</span></span>
+          </div>
+        </div>
+
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          You are trapped inside the four concentric security rings of the <span class="text-cyan-300 font-semibold">Aether-9 Cyber-Enclosure</span>. Clear <span class="text-lime-300 font-semibold">all 4 Security Rings</span> using parkour Kong-vaults, plasma dodges, thruster flips, and Sandevistan surges to shatter the <span class="text-amber-300 font-semibold">Outer Dome Shield</span> and escape into the free skyline—before the <span class="text-pink-400 font-semibold">APEX-7 Enforcer Drone</span> traps you in a neural stasis cage!
+        </p>
+
+        <!-- 4 Enclosure Escape Levels -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Level 1 -->
+          <div data-sector="0" class="sector-card cursor-pointer rounded p-3.5 bg-slate-900/90 border-2 border-cyan-400 hover:bg-slate-800/80 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-cyber text-xs font-bold text-cyan-300">LEVEL 01 // RING ALPHA</span>
+                <span id="badgeLvl0" class="text-[11px] font-mono-tech px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-200">850m ESCAPE</span>
+              </div>
+              <h3 class="font-cyber text-base font-extrabold text-white mt-1">Cryo-Containment Cellblock</h3>
+              <p class="text-xs text-slate-400 mt-1">Break out of stasis pods, shatter holo-glass partitions, and vault quantum server racks.</p>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-[11px] font-mono-tech text-cyan-300 pt-2 border-t border-slate-800">
+              <span>RING LOCK 1/4</span>
+              <span class="sector-status font-bold">SELECTED ✓</span>
+            </div>
+          </div>
+
+          <!-- Level 2 -->
+          <div data-sector="1" class="sector-card cursor-pointer rounded p-3.5 bg-slate-900/70 border border-slate-700 hover:border-fuchsia-400/70 hover:bg-slate-800/80 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-cyber text-xs font-bold text-fuchsia-300">LEVEL 02 // RING BETA</span>
+                <span id="badgeLvl1" class="text-[11px] font-mono-tech px-1.5 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-200">1,050m ESCAPE</span>
+              </div>
+              <h3 class="font-cyber text-base font-extrabold text-white mt-1">Sub-Zero Coolant Sector</h3>
+              <p class="text-xs text-slate-400 mt-1">Acid neon rain, overhead hydraulic plasma gates, and high-voltage magnetic ziplines.</p>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-[11px] font-mono-tech text-fuchsia-300 pt-2 border-t border-slate-800">
+              <span>RING LOCK 2/4</span>
+              <span class="sector-status">CLICK TO SELECT</span>
+            </div>
+          </div>
+
+          <!-- Level 3 -->
+          <div data-sector="2" class="sector-card cursor-pointer rounded p-3.5 bg-slate-900/70 border border-slate-700 hover:border-lime-400/70 hover:bg-slate-800/80 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-cyber text-xs font-bold text-lime-300">LEVEL 03 // RING GAMMA</span>
+                <span id="badgeLvl2" class="text-[11px] font-mono-tech px-1.5 py-0.5 rounded bg-lime-500/20 text-lime-200">1,250m ESCAPE</span>
+              </div>
+              <h3 class="font-cyber text-base font-extrabold text-white mt-1">Neural Firewall Matrix</h3>
+              <p class="text-xs text-slate-400 mt-1">Dense laser security matrices, multi-tier sky-bridges, and aggressive Enforcer pursuit.</p>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-[11px] font-mono-tech text-lime-300 pt-2 border-t border-slate-800">
+              <span>RING LOCK 3/4</span>
+              <span class="sector-status">CLICK TO SELECT</span>
+            </div>
+          </div>
+
+          <!-- Level 4: Final Enclosure Perimeter Breach -->
+          <div data-sector="3" class="sector-card cursor-pointer rounded p-3.5 bg-slate-900/70 border border-slate-700 hover:border-amber-400/70 hover:bg-slate-800/80 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-cyber text-xs font-bold text-amber-300">LEVEL 04 // FINAL BREACH</span>
+                <span id="badgeLvl3" class="text-[11px] font-mono-tech px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200">1,450m // BEST: <span id="bestEndlessDist">0</span>m</span>
+              </div>
+              <h3 class="font-cyber text-base font-extrabold text-white mt-1">Outer Enclosure Dome Wall</h3>
+              <p class="text-xs text-slate-400 mt-1">Shatter the outer containment barrier to escape the Enclosure once and for all!</p>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-[11px] font-mono-tech text-amber-300 pt-2 border-t border-slate-800">
+              <span>FINAL DOME GATE 4/4</span>
+              <span class="sector-status">CLICK TO SELECT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls & Start Row -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-800">
+          <div class="text-xs font-mono-tech text-slate-400 flex flex-wrap gap-x-4 gap-y-1">
+            <span><b class="text-cyan-300">[W/SPACE]</b> Jump, Flip & Vault</span>
+            <span><b class="text-cyan-300">[S/DOWN]</b> Dodge Slide</span>
+            <span><b class="text-lime-300">[SHIFT/D]</b> Phase Surge</span>
+            <span><b class="text-fuchsia-300">[E]</b> EMP Hack</span>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button id="btnMenuUpgrades" type="button" class="cyber-btn px-4 py-2.5 bg-fuchsia-600/25 hover:bg-fuchsia-600/40 border border-fuchsia-400 text-fuchsia-200 font-cyber text-xs font-bold">
+              CYBERWARE LAB
+            </button>
+            <button id="btnStartBreach" type="button" class="cyber-btn px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-cyber text-sm font-black tracking-wider shadow-[0_0_25px_rgba(0,243,255,0.5)]">
+              INITIATE BREACH ▶
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CYBERWARE RIG / UPGRADES MODAL -->
+    <div id="rigModal" class="hidden absolute inset-0 z-30 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md">
+      <div class="cyber-panel-pink w-full max-w-2xl rounded-lg p-4 sm:p-6 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-pink-500/30 pb-3">
+          <div>
+            <span class="text-[10px] font-mono-tech uppercase text-pink-400">BLACK-MARKET AUGMENTATION</span>
+            <h2 class="font-cyber text-xl sm:text-2xl font-black text-white">RUNNER CYBER-RIG LAB</h2>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-mono-tech text-sm font-bold text-amber-300 bg-slate-900 px-3 py-1 rounded border border-amber-400/40">
+              ₿ <span id="rigShardsCount">0</span>
+            </span>
+            <button id="btnCloseRig" type="button" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono-tech text-xs border border-slate-600">
+              ESC / BACK
+            </button>
+          </div>
+        </div>
+
+        <!-- Suit Neon Palette Selector -->
+        <div>
+          <label class="block text-xs font-mono-tech text-cyan-300 mb-2">CHASSIS NEON CHROMA (SUIT & THRUSTER VISUALS):</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button type="button" data-suit="cyan" class="suit-btn px-3 py-2 rounded border border-cyan-400 bg-cyan-500/20 text-cyan-200 font-cyber text-xs font-bold">
+              PHANTOM CYAN
+            </button>
+            <button type="button" data-suit="magenta" class="suit-btn px-3 py-2 rounded border border-slate-700 bg-slate-900 text-pink-300 font-cyber text-xs font-bold">
+              GLITCH MAGENTA
+            </button>
+            <button type="button" data-suit="lime" class="suit-btn px-3 py-2 rounded border border-slate-700 bg-slate-900 text-lime-300 font-cyber text-xs font-bold">
+              ACID VOLT
+            </button>
+            <button type="button" data-suit="amber" class="suit-btn px-3 py-2 rounded border border-slate-700 bg-slate-900 text-amber-300 font-cyber text-xs font-bold">
+              SOLAR GOLD
+            </button>
+          </div>
+        </div>
+
+        <!-- Cyberware Upgrades -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-3.5 rounded bg-slate-900/90 border border-cyan-500/30 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center">
+                <span class="font-cyber text-xs font-bold text-cyan-300">KINETIC SERVOS</span>
+                <span id="lvlServos" class="font-mono-tech text-xs text-amber-300">LVL 1</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Increases parkour vault speed boost & aerial thruster jump height.</p>
+            </div>
+            <button id="btnBuyServos" type="button" class="mt-3 w-full py-1.5 rounded bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400 text-cyan-200 font-mono-tech text-xs font-bold transition">
+              UPGRADE (₿ 100)
+            </button>
+          </div>
+
+          <div class="p-3.5 rounded bg-slate-900/90 border border-lime-500/30 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center">
+                <span class="font-cyber text-xs font-bold text-lime-300">SANDEVISTAN CORE</span>
+                <span id="lvlSurge" class="font-mono-tech text-xs text-amber-300">LVL 1</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Faster Surge recharge & longer phase-dash invulnerability.</p>
+            </div>
+            <button id="btnBuySurge" type="button" class="mt-3 w-full py-1.5 rounded bg-lime-500/20 hover:bg-lime-500/35 border border-lime-400 text-lime-200 font-mono-tech text-xs font-bold transition">
+              UPGRADE (₿ 100)
+            </button>
+          </div>
+
+          <div class="p-3.5 rounded bg-slate-900/90 border border-fuchsia-500/30 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center">
+                <span class="font-cyber text-xs font-bold text-fuchsia-300">EMP PULSE CAPACITOR</span>
+                <span id="lvlEmp" class="font-mono-tech text-xs text-amber-300">LVL 1</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Wider EMP hack range & pushes pursuing Enforcer Drone back.</p>
+            </div>
+            <button id="btnBuyEmp" type="button" class="mt-3 w-full py-1.5 rounded bg-fuchsia-500/20 hover:bg-fuchsia-500/35 border border-fuchsia-400 text-fuchsia-200 font-mono-tech text-xs font-bold transition">
+              UPGRADE (₿ 100)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTCOME MODAL (RING CLEARED, ENCLOSURE ESCAPED, OR CAPTURED) -->
+    <div id="outcomeModal" class="hidden absolute inset-0 z-30 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+      <div class="cyber-panel w-full max-w-md rounded-lg p-5 sm:p-6 text-center flex flex-col gap-4">
+        <div id="outcomeBadge" class="inline-block mx-auto px-3 py-0.5 rounded text-xs font-mono-tech font-bold bg-cyan-500/20 border border-cyan-400 text-cyan-300">
+          SECTOR EXTRACTION SUCCESSFUL
+        </div>
+        <h2 id="outcomeTitle" class="font-cyber text-2xl sm:text-3xl font-black text-white">
+          ESCAPED THE GRID!
+        </h2>
+        <p id="outcomeDesc" class="text-xs sm:text-sm text-slate-300">
+          You bypassed the Aether-Corp firewall and uploaded the neural decryption keys before lockdown.
+        </p>
+
+        <!-- Enclosure 4-Level Progress Strip inside Modal -->
+        <div class="bg-slate-900/80 border border-cyan-500/30 rounded p-2.5 flex flex-col gap-1.5">
+          <div class="flex justify-between items-center text-[10px] font-mono-tech text-cyan-300">
+            <span>ENCLOSURE PERIMETER PROGRESS</span>
+            <span id="outcomeLocksText">0 / 4 RINGS BREACHED</span>
+          </div>
+          <div id="outcomeLocksGrid" class="grid grid-cols-4 gap-1.5">
+            <div class="h-2 rounded-xs bg-slate-800"></div>
+            <div class="h-2 rounded-xs bg-slate-800"></div>
+            <div class="h-2 rounded-xs bg-slate-800"></div>
+            <div class="h-2 rounded-xs bg-slate-800"></div>
+          </div>
+        </div>
+
+        <!-- Stats Summary Grid -->
+        <div class="grid grid-cols-3 gap-2 bg-slate-900/90 p-3 rounded border border-slate-800 font-mono-tech">
+          <div>
+            <div class="text-[10px] text-slate-400">DISTANCE</div>
+            <div id="statFinalDist" class="text-sm sm:text-base font-bold text-cyan-300">900m</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">PARKOUR FLOW</div>
+            <div id="statFinalTricks" class="text-sm sm:text-base font-bold text-lime-300">14 TRICKS</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">SHARDS EARNED</div>
+            <div id="statFinalShards" class="text-sm sm:text-base font-bold text-amber-300">+₿ 120</div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button id="btnOutcomeMenu" type="button" class="cyber-btn px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-cyber text-xs font-bold">
+            SECTOR SELECT
+          </button>
+          <button id="btnOutcomeRetry" type="button" class="cyber-btn px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-cyber text-xs sm:text-sm font-black">
+            RUN AGAIN ▶
+          </button>
+          <button id="btnOutcomeNext" type="button" class="cyber-btn hidden px-5 py-2.5 bg-gradient-to-r from-lime-400 to-emerald-500 text-slate-950 font-cyber text-xs sm:text-sm font-black">
+            NEXT SECTOR ▶▶
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ============================================================================
+    // NEON BREACH // CYBER-PARKOUR ENCLOSURE ESCAPE ENGINE (V2 OVERHAUL)
+    // Features:
+    // - 4-Level Enclosure Escape Campaign + Grand Freedom Finale
+    // - Full In-Canvas Capture Animation (Laser Tether, Hex Stasis Cage, EMP Net)
+    // - High-Detail Cyberpunk Obstacle & Environment Assets
+    // - Dynamic Jump/Dodge/Vault Shockwaves, Speed-Lines, Scarf Physics & Thrusters
+    // ============================================================================
+
+    (function () {
+      'use strict';
+
+      // --- DOM ELEMENTS ---
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const container = document.getElementById('canvasContainer');
+
+      const hudSectorBadge = document.getElementById('hudSectorBadge');
+      const hudEnclosureLocks = document.getElementById('hudEnclosureLocks');
+      const hudPursuitBar = document.getElementById('hudPursuitBar');
+      const hudKeysContainer = document.getElementById('hudKeysContainer');
+      const hudSurgeBar = document.getElementById('hudSurgeBar');
+      const hudShards = document.getElementById('hudShards');
+      const hudDistance = document.getElementById('hudDistance');
+      const hudProgressLine = document.getElementById('hudProgressLine');
+
+      const trickFeed = document.getElementById('trickFeed');
+      const trickName = document.getElementById('trickName');
+      const trickMult = document.getElementById('trickMult');
+      const trickSub = document.getElementById('trickSub');
+      const breachPrompt = document.getElementById('breachPrompt');
+
+      const menuModal = document.getElementById('menuModal');
+      const rigModal = document.getElementById('rigModal');
+      const outcomeModal = document.getElementById('outcomeModal');
+
+      const menuShardsCount = document.getElementById('menuShardsCount');
+      const menuEnclosureStatus = document.getElementById('menuEnclosureStatus');
+      const rigShardsCount = document.getElementById('rigShardsCount');
+      const bestEndlessDistEl = document.getElementById('bestEndlessDist');
+
+      const btnOpenRig = document.getElementById('btnOpenRig');
+      const btnMenuUpgrades = document.getElementById('btnMenuUpgrades');
+      const btnCloseRig = document.getElementById('btnCloseRig');
+      const btnPauseToggle = document.getElementById('btnPauseToggle');
+      const btnMuteToggle = document.getElementById('btnMuteToggle');
+      const btnStartBreach = document.getElementById('btnStartBreach');
+
+      const btnTouchJump = document.getElementById('btnTouchJump');
+      const btnTouchSlide = document.getElementById('btnTouchSlide');
+      const btnTouchSurge = document.getElementById('btnTouchSurge');
+      const btnTouchPulse = document.getElementById('btnTouchPulse');
+
+      const btnOutcomeMenu = document.getElementById('btnOutcomeMenu');
+      const btnOutcomeRetry = document.getElementById('btnOutcomeRetry');
+      const btnOutcomeNext = document.getElementById('btnOutcomeNext');
+
+      const btnBuyServos = document.getElementById('btnBuyServos');
+      const btnBuySurge = document.getElementById('btnBuySurge');
+      const btnBuyEmp = document.getElementById('btnBuyEmp');
+      const lvlServos = document.getElementById('lvlServos');
+      const lvlSurge = document.getElementById('lvlSurge');
+      const lvlEmp = document.getElementById('lvlEmp');
+
+      // --- PERSISTENT PLAYER SAVE DATA ---
+      const saveState = {
+        shards: 150,
+        suit: 'cyan',
+        servosLvl: 1,
+        surgeLvl: 1,
+        empLvl: 1,
+        bestEndless: 0,
+        clearedSectors: [false, false, false, false]
+      };
+
+      function loadSave() {
+        try {
+          const raw = localStorage.getItem('neon_breach_save_v2');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            Object.assign(saveState, parsed);
+            if (!Array.isArray(saveState.clearedSectors) || saveState.clearedSectors.length < 4) {
+              saveState.clearedSectors = [false, false, false, false];
+            }
+          }
+        } catch (e) {
+          // Sandbox fallback
+        }
+        syncSaveUI();
+      }
+
+      function writeSave() {
+        try {
+          localStorage.setItem('neon_breach_save_v2', JSON.stringify(saveState));
+        } catch (e) {
+          // Ignore storage blocks
+        }
+        syncSaveUI();
+      }
+
+      function getClearedCount() {
+        return saveState.clearedSectors.filter(Boolean).length;
+      }
+
+      // --- SUIT NEON PALETTES ---
+      const SUIT_PALETTES = {
+        cyan: { primary: '#00f3ff', secondary: '#ff007f', glow: 'rgba(0, 243, 255, 0.75)', trail: '0, 243, 255' },
+        magenta: { primary: '#ff007f', secondary: '#00f3ff', glow: 'rgba(255, 0, 127, 0.75)', trail: '255, 0, 127' },
+        lime: { primary: '#b8ff00', secondary: '#00f3ff', glow: 'rgba(184, 255, 0, 0.75)', trail: '184, 255, 0' },
+        amber: { primary: '#ffaa00', secondary: '#ff0055', glow: 'rgba(255, 170, 0, 0.75)', trail: '255, 170, 0' }
+      };
+
+      // --- 4 ENCLOSURE RINGS (LEVELS) DEFINITION ---
+      const SECTORS = [
+        {
+          id: 0,
+          code: 'LEVEL 01 // RING ALPHA',
+          name: 'Cryo-Containment Cellblock',
+          targetDist: 850,
+          baseSpeed: 410,
+          skyTop: '#040614',
+          skyBot: '#0c1938',
+          accent: '#00f3ff',
+          gridColor: 'rgba(0, 243, 255, 0.18)',
+          rain: false
+        },
+        {
+          id: 1,
+          code: 'LEVEL 02 // RING BETA',
+          name: 'Sub-Zero Coolant Sector',
+          targetDist: 1050,
+          baseSpeed: 450,
+          skyTop: '#090418',
+          skyBot: '#240b36',
+          accent: '#ff007f',
+          gridColor: 'rgba(255, 0, 127, 0.18)',
+          rain: true
+        },
+        {
+          id: 2,
+          code: 'LEVEL 03 // RING GAMMA',
+          name: 'Neural Firewall Matrix',
+          targetDist: 1250,
+          baseSpeed: 485,
+          skyTop: '#04120e',
+          skyBot: '#0d2b22',
+          accent: '#b8ff00',
+          gridColor: 'rgba(184, 255, 0, 0.18)',
+          rain: false
+        },
+        {
+          id: 3,
+          code: 'LEVEL 04 // OUTER DOME WALL',
+          name: 'Outer Enclosure Perimeter',
+          targetDist: 1450,
+          baseSpeed: 515,
+          skyTop: '#120704',
+          skyBot: '#2e1118',
+          accent: '#ffaa00',
+          gridColor: 'rgba(255, 170, 0, 0.2)',
+          rain: true
+        }
+      ];
+
+      // --- WEB AUDIO SYNTHESIZER ---
+      const sound = {
+        ctx: null,
+        muted: false,
+        bgmTimer: null,
+        stepIndex: 0,
+
+        init() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              this.ctx = new AudioCtx();
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+        },
+
+        playTone(freq, type, duration, vol = 0.12, slideFreq = null) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            if (slideFreq) {
+              osc.frequency.exponentialRampToValueAtTime(slideFreq, now + duration);
+            }
+            gain.gain.setValueAtTime(vol, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + duration);
+          } catch (e) {}
+        },
+
+        jump() {
+          this.playTone(230, 'sawtooth', 0.18, 0.11, 580);
+        },
+        vault() {
+          this.playTone(340, 'triangle', 0.12, 0.14, 820);
+          setTimeout(() => this.playTone(620, 'sine', 0.16, 0.12, 980), 55);
+        },
+        slide() {
+          this.playTone(210, 'sawtooth', 0.24, 0.11, 70);
+        },
+        dodge() {
+          this.playTone(520, 'sine', 0.1, 0.11, 880);
+        },
+        glassShatter() {
+          this.playTone(980, 'square', 0.08, 0.12, 420);
+          setTimeout(() => this.playTone(1350, 'sawtooth', 0.11, 0.1, 310), 35);
+          setTimeout(() => this.playTone(760, 'triangle', 0.14, 0.09, 190), 70);
+        },
+        shard() {
+          this.playTone(660, 'sine', 0.09, 0.11, 990);
+        },
+        keyPickup() {
+          this.playTone(523.25, 'triangle', 0.12, 0.15, 659.25);
+          setTimeout(() => this.playTone(659.25, 'triangle', 0.12, 0.15, 783.99), 90);
+          setTimeout(() => this.playTone(1046.5, 'sine', 0.25, 0.16, 1318.5), 180);
+        },
+        surge() {
+          this.playTone(140, 'sawtooth', 0.38, 0.16, 860);
+        },
+        emp() {
+          this.playTone(880, 'sawtooth', 0.32, 0.16, 110);
+        },
+        stumble() {
+          this.playTone(130, 'sawtooth', 0.28, 0.18, 55);
+        },
+        capture() {
+          // Dramatic stasis siren & EMP clamp sound
+          this.playTone(640, 'sawtooth', 0.35, 0.18, 180);
+          setTimeout(() => this.playTone(480, 'square', 0.4, 0.16, 110), 250);
+          setTimeout(() => this.playTone(320, 'sawtooth', 0.6, 0.18, 65), 550);
+        },
+        win() {
+          [523, 659, 784, 1046, 1318].forEach((f, idx) => {
+            setTimeout(() => this.playTone(f, 'triangle', 0.24, 0.15, f * 1.05), idx * 90);
+          });
+        },
+        startBgm() {
+          this.stopBgm();
+          const bassNotes = [110, 110, 130.81, 110, 146.83, 130.81, 98, 110];
+          this.bgmTimer = setInterval(() => {
+            if (this.muted || !game.running || game.paused || game.cinematicMode) return;
+            const note = bassNotes[this.stepIndex % bassNotes.length];
+            this.playTone(note, 'sawtooth', 0.14, 0.045, note * 0.98);
+            if (this.stepIndex % 2 === 0) {
+              this.playTone(note * 2, 'triangle', 0.07, 0.03, note * 2.02);
+            }
+            this.stepIndex++;
+          }, 165);
+        },
+        stopBgm() {
+          if (this.bgmTimer) {
+            clearInterval(this.bgmTimer);
+            this.bgmTimer = null;
+          }
+        }
+      };
+
+      // --- GAME STATE ---
+      let selectedSectorIdx = 0;
+      let animFrameId = null;
+      let lastTime = 0;
+
+      const game = {
+        running: false,
+        paused: false,
+        cinematicMode: null, // null | 'capturing' | 'escaping'
+        cinematicTimer: 0,
+        sector: SECTORS[0],
+        width: 1280,
+        height: 720,
+        groundY: 560,
+        upperDeckY: 360,
+        cameraShake: 0,
+        dodgeFlashAlpha: 0,
+        distance: 0,
+        speed: 410,
+        shardsEarned: 0,
+        keysCollected: 0,
+        tricksCount: 0,
+        comboCount: 0,
+        comboTimer: 0,
+        surgeEnergy: 100,
+        surgeActiveTimer: 0,
+        surgeCooldown: 0,
+        empCooldown: 0,
+        pursuitThreat: 22,
+        nextSpawnX: 700,
+        nextKeyDist: 210,
+        portalSpawned: false,
+        bgBuildingsFar: [],
+        bgBuildingsMid: [],
+        bgSigns: [],
+        rainDrops: [],
+        speedLines: [],
+        shockRings: [],
+        obstacles: [],
+        collectibles: [],
+        particles: [],
+        glassShards: [],
+        floatingTexts: [],
+        empWaves: []
+      };
+
+      // --- RUNNER ENTITY (Articulated Cyber-Parkour Agent with Scarf Nodes) ---
+      const runner = {
+        x: 250,
+        y: 560,
+        vy: 0,
+        width: 44,
+        height: 82,
+        state: 'run', // 'run', 'jump', 'flip', 'vault', 'slide', 'zipline', 'captured', 'escaped'
+        stateTimer: 0,
+        animPhase: 0,
+        flipAngle: 0,
+        onGround: true,
+        currentSurfaceY: 560,
+        ziplineObj: null,
+        invulnTimer: 0,
+        stumbleTimer: 0,
+        ghostTrail: [],
+        scarfNodes: []
+      };
+
+      // --- PURSUING ENFORCER DRONE ---
+      const enforcer = {
+        x: 70,
+        y: 440,
+        bobPhase: 0,
+        rotorPhase: 0
+      };
+
+      // --- RESIZE HANDLER ---
+      function resizeCanvas() {
+        const rect = container.getBoundingClientRect();
+        game.width = Math.max(320, rect.width);
+        game.height = Math.max(320, rect.height);
+        canvas.width = game.width;
+        canvas.height = game.height;
+        game.groundY = Math.floor(game.height * 0.79);
+        game.upperDeckY = Math.floor(game.height * 0.49);
+        if (!game.cinematicMode) {
+          runner.x = Math.min(270, Math.max(115, Math.floor(game.width * 0.22)));
+        }
+        if (runner.onGround && runner.state !== 'zipline') {
+          runner.y = game.groundY;
+        }
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+
+      // --- INITIALIZE PARALLAX ENCLOSURE MEGACITY ---
+      function initEnvironment() {
+        game.bgBuildingsFar = [];
+        game.bgBuildingsMid = [];
+        game.bgSigns = [];
+        game.rainDrops = [];
+        game.speedLines = [];
+        game.shockRings = [];
+
+        for (let x = 0; x < game.width + 400; x += 95) {
+          game.bgBuildingsFar.push({
+            x,
+            w: 75 + Math.random() * 55,
+            h: 160 + Math.random() * 240,
+            winSeed: Math.floor(Math.random() * 100)
+          });
+        }
+        for (let x = 0; x < game.width + 400; x += 140) {
+          game.bgBuildingsMid.push({
+            x,
+            w: 95 + Math.random() * 65,
+            h: 110 + Math.random() * 170,
+            hasAntenna: Math.random() > 0.4,
+            hue: Math.random() > 0.5 ? 'cyan' : 'pink'
+          });
+        }
+        const signLabels = ['ENCLOSURE-09', 'LOCKDOWN', 'DOME SHIELD', 'CYBER-OS', 'NO EXIT', 'RING // 04'];
+        for (let i = 0; i < 6; i++) {
+          game.bgSigns.push({
+            x: i * 310 + 120,
+            y: 105 + (i % 3) * 65,
+            text: signLabels[i % signLabels.length],
+            color: i % 2 === 0 ? '#00f3ff' : '#ff007f'
+          });
+        }
+        for (let i = 0; i < 85; i++) {
+          game.rainDrops.push({
+            x: Math.random() * game.width,
+            y: Math.random() * game.height,
+            len: 14 + Math.random() * 18,
+            speed: 550 + Math.random() * 250
+          });
+        }
+
+        // Initialize scarf nodes
+        runner.scarfNodes = [];
+        for (let i = 0; i < 7; i++) {
+          runner.scarfNodes.push({ x: runner.x - i * 8, y: runner.y - 64 });
+        }
+      }
+
+      // --- SHOW TRICK CALLOUT ---
+      let trickTimeout = null;
+      function triggerTrickBanner(title, bonusText, scoreAdd = 150, surgeAdd = 8) {
+        game.tricksCount++;
+        game.comboCount++;
+        game.comboTimer = 3.2;
+        game.surgeEnergy = Math.min(100, game.surgeEnergy + Math.ceil(surgeAdd * 0.55));
+
+        trickName.textContent = title;
+        trickMult.textContent = `x${game.comboCount} FLOW`;
+        trickSub.textContent = `${bonusText} // +${scoreAdd * game.comboCount} PTS`;
+        trickFeed.classList.remove('opacity-0');
+        trickFeed.classList.add('opacity-100');
+
+        if (trickTimeout) clearTimeout(trickTimeout);
+        trickTimeout = setTimeout(() => {
+          trickFeed.classList.remove('opacity-100');
+          trickFeed.classList.add('opacity-0');
+        }, 1600);
+      }
+
+      function addFloatingText(x, y, text, color = '#00f3ff') {
+        game.floatingTexts.push({
+          x,
+          y,
+          text,
+          color,
+          life: 1.0
+        });
+      }
+
+      // --- SPAWN SHOCKWAVE RINGS, SPEED LINES & PARTICLES ---
+      function spawnShockRing(x, y, color = '#00f3ff', maxR = 65, flat = true) {
+        game.shockRings.push({
+          x,
+          y,
+          r: 8,
+          maxR,
+          color,
+          flat,
+          alpha: 1.0
+        });
+      }
+
+      function spawnSpeedLines(count = 12, color = '#00f3ff') {
+        for (let i = 0; i < count; i++) {
+          game.speedLines.push({
+            x: game.width * (0.3 + Math.random() * 0.7),
+            y: Math.random() * (game.groundY - 30) + 20,
+            len: 90 + Math.random() * 160,
+            speed: 1400 + Math.random() * 900,
+            color,
+            alpha: 0.45 + Math.random() * 0.45
+          });
+        }
+      }
+
+      function spawnSparks(x, y, count, color, speedScale = 1) {
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const spd = (50 + Math.random() * 195) * speedScale;
+          game.particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * spd - game.speed * 0.25,
+            vy: Math.sin(angle) * spd - 45,
+            size: 2 + Math.random() * 3.8,
+            color,
+            life: 0.35 + Math.random() * 0.42,
+            maxLife: 0.77
+          });
+        }
+      }
+
+      function spawnGlassShatter(x, y, h) {
+        sound.glassShatter();
+        game.cameraShake = 8;
+        spawnShockRing(x, y - h * 0.5, '#00f3ff', 85, false);
+        for (let i = 0; i < 30; i++) {
+          game.glassShards.push({
+            x: x + (Math.random() - 0.5) * 18,
+            y: y - Math.random() * h,
+            vx: 160 + Math.random() * 360,
+            vy: -170 + Math.random() * 270,
+            rot: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 15,
+            size: 5 + Math.random() * 10,
+            life: 0.8 + Math.random() * 0.45
+          });
+        }
+      }
+
+      // --- PROCEDURAL ESCAPE OBSTACLE GENERATOR ---
+      function spawnObstaclePattern(startX) {
+        // Spawn the Ring / Enclosure Gate Portal when reaching targetDist
+        if (game.distance >= game.sector.targetDist - 120 && !game.portalSpawned) {
+          game.portalSpawned = true;
+          game.obstacles.push({
+            type: 'extraction_portal',
+            x: startX + 240,
+            y: game.groundY,
+            w: 110,
+            h: 215,
+            isFinalDomeWall: game.sector.id === 3,
+            passed: false
+          });
+          return startX + 650;
+        }
+
+        const roll = Math.random();
+        let nextX = startX;
+
+        if (roll < 0.20) {
+          // 1. QUANTUM SERVER VAULT TERMINAL + SHARD ARC
+          const boxW = 68;
+          const boxH = 56;
+          game.obstacles.push({
+            type: 'vault_terminal',
+            x: startX,
+            y: game.groundY,
+            w: boxW,
+            h: boxH,
+            vaulted: false,
+            hit: false
+          });
+          for (let i = 0; i < 3; i++) {
+            game.collectibles.push({
+              type: 'shard',
+              x: startX + 10 + i * 28,
+              y: game.groundY - boxH - 44 - (i === 1 ? 18 : 0),
+              r: 9,
+              collected: false
+            });
+          }
+          nextX = startX + 330;
+        } else if (roll < 0.38) {
+          // 2. OVERHEAD HYDRAULIC PLASMA BLAST DOOR (Requires Dodge Slide)
+          game.obstacles.push({
+            type: 'overhead_gate',
+            x: startX,
+            y: game.groundY - 50,
+            w: 98,
+            h: 175,
+            passed: false,
+            hit: false
+          });
+          for (let i = 0; i < 3; i++) {
+            game.collectibles.push({
+              type: 'shard',
+              x: startX + 15 + i * 30,
+              y: game.groundY - 22,
+              r: 9,
+              collected: false
+            });
+          }
+          nextX = startX + 350;
+        } else if (roll < 0.54) {
+          // 3. BREAKABLE HOLO-GLASS SHIELD + VAULT DESK COMBO
+          game.obstacles.push({
+            type: 'holo_glass',
+            x: startX,
+            y: game.groundY,
+            w: 20,
+            h: 150,
+            shattered: false
+          });
+          game.obstacles.push({
+            type: 'vault_terminal',
+            x: startX + 175,
+            y: game.groundY,
+            w: 74,
+            h: 56,
+            vaulted: false,
+            hit: false
+          });
+          nextX = startX + 430;
+        } else if (roll < 0.70) {
+          // 4. SECURITY LASER MATRIX + HACK TERMINAL
+          game.obstacles.push({
+            type: 'laser_grid',
+            x: startX + 60,
+            y: game.groundY,
+            w: 30,
+            h: 120,
+            disabled: false,
+            hit: false
+          });
+          game.obstacles.push({
+            type: 'hack_node',
+            x: startX - 48,
+            y: game.groundY,
+            w: 38,
+            h: 66,
+            hacked: false
+          });
+          nextX = startX + 360;
+        } else if (roll < 0.85) {
+          // 5. UPPER CYBER-CATWALK + REPULSOR JUMP PAD
+          const catwalkW = 345;
+          game.obstacles.push({
+            type: 'jump_pad',
+            x: startX - 30,
+            y: game.groundY,
+            w: 52,
+            h: 16,
+            used: false
+          });
+          game.obstacles.push({
+            type: 'catwalk',
+            x: startX + 95,
+            y: game.upperDeckY,
+            w: catwalkW,
+            h: 20
+          });
+          for (let i = 0; i < 5; i++) {
+            game.collectibles.push({
+              type: 'shard',
+              x: startX + 135 + i * 52,
+              y: game.upperDeckY - 34,
+              r: 9,
+              collected: false
+            });
+          }
+          game.obstacles.push({
+            type: 'overhead_gate',
+            x: startX + 210,
+            y: game.groundY - 50,
+            w: 88,
+            h: 135,
+            passed: false,
+            hit: false
+          });
+          nextX = startX + catwalkW + 240;
+        } else {
+          // 6. OVERHEAD MAG-ZIPLINE ACROSS PLASMA CONDUIT FLOOR
+          const zipLen = 325;
+          game.obstacles.push({
+            type: 'zipline',
+            x: startX,
+            y: game.upperDeckY - 55,
+            w: zipLen,
+            h: 14,
+            grabbed: false
+          });
+          game.obstacles.push({
+            type: 'shock_floor',
+            x: startX + 45,
+            y: game.groundY,
+            w: zipLen - 70,
+            h: 18,
+            hit: false
+          });
+          for (let i = 0; i < 4; i++) {
+            game.collectibles.push({
+              type: 'shard',
+              x: startX + 60 + i * 65,
+              y: game.upperDeckY - 10,
+              r: 9,
+              collected: false
+            });
+          }
+          nextX = startX + zipLen + 230;
+        }
+
+        // Spawn 3 Decryption Keys per Ring
+        if (game.keysCollected < 3 && game.distance >= game.nextKeyDist) {
+          game.nextKeyDist += (game.sector.targetDist * 0.27);
+          game.collectibles.push({
+            type: 'key',
+            x: startX + 85,
+            y: game.groundY - 115,
+            r: 15,
+            collected: false
+          });
+        }
+
+        return nextX + Math.max(60, 175 - game.distance * 0.04);
+      }
+
+      // --- RESET & START SECTOR ---
+      function startSector(sectorIndex) {
+        sound.init();
+        selectedSectorIdx = sectorIndex;
+        game.sector = SECTORS[sectorIndex];
+
+        game.cinematicMode = null;
+        game.cinematicTimer = 0;
+        resizeCanvas();
+        initEnvironment();
+
+        game.running = true;
+        game.paused = false;
+        game.distance = 0;
+        game.speed = game.sector.baseSpeed;
+        game.shardsEarned = 0;
+        game.keysCollected = 0;
+        game.tricksCount = 0;
+        game.comboCount = 0;
+        game.comboTimer = 0;
+        game.surgeEnergy = 100;
+        game.surgeActiveTimer = 0;
+        game.surgeCooldown = 0;
+        game.empCooldown = 0;
+        game.pursuitThreat = 20;
+        game.nextSpawnX = game.width * 0.68;
+        game.nextKeyDist = 175;
+        game.portalSpawned = false;
+        game.dodgeFlashAlpha = 0;
+
+        game.obstacles = [];
+        game.collectibles = [];
+        game.particles = [];
+        game.glassShards = [];
+        game.floatingTexts = [];
+        game.empWaves = [];
+        game.shockRings = [];
+        game.speedLines = [];
+
+        runner.x = Math.min(270, Math.max(115, Math.floor(game.width * 0.22)));
+        runner.y = game.groundY;
+        runner.vy = 0;
+        runner.state = 'run';
+        runner.stateTimer = 0;
+        runner.onGround = true;
+        runner.currentSurfaceY = game.groundY;
+        runner.ziplineObj = null;
+        runner.invulnTimer = 0;
+        runner.stumbleTimer = 0;
+        runner.ghostTrail = [];
+
+        while (game.nextSpawnX < game.width * 2.2) {
+          game.nextSpawnX = spawnObstaclePattern(game.nextSpawnX);
+        }
+
+        hudSectorBadge.textContent = game.sector.code;
+        btnPauseToggle.textContent = 'PAUSE';
+        menuModal.classList.add('hidden');
+        rigModal.classList.add('hidden');
+        outcomeModal.classList.add('hidden');
+
+        updateHUD();
+        sound.startBgm();
+
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        lastTime = performance.now();
+        animFrameId = requestAnimationFrame(gameLoop);
+      }
+
+      // --- PLAYER ACTIONS (Jump/Vault, Dodge/Slide, Sandevistan Surge, EMP Hack) ---
+      function actionJumpOrVault() {
+        if (!game.running || game.paused || game.cinematicMode) return;
+        sound.init();
+
+        // Release from zipline with an aerial thruster flip
+        if (runner.state === 'zipline') {
+          runner.state = 'flip';
+          runner.vy = -575;
+          runner.onGround = false;
+          runner.ziplineObj = null;
+          runner.flipAngle = 0;
+          sound.vault();
+          spawnShockRing(runner.x, runner.y - 45, '#ffaa00', 70, false);
+          spawnSpeedLines(10, '#ffaa00');
+          triggerTrickBanner('MAG-RAIL DISMOUNT FLIP', '+200 AERIAL', 200, 15);
+          return;
+        }
+
+        // Check if a vault_terminal is in front of the runner for a context-sensitive Parkour Vault!
+        const vaultTarget = game.obstacles.find(
+          (o) =>
+            o.type === 'vault_terminal' &&
+            !o.vaulted &&
+            o.x - runner.x > -28 &&
+            o.x - runner.x < 120 &&
+            Math.abs(runner.y - o.y) < 48
+        );
+
+        if (vaultTarget) {
+          vaultTarget.vaulted = true;
+          runner.state = 'vault';
+          runner.stateTimer = 0.42;
+          runner.vy = -505 - saveState.servosLvl * 18;
+          runner.onGround = false;
+          runner.invulnTimer = 0.46;
+          game.pursuitThreat = Math.max(5, game.pursuitThreat - 5);
+          game.dodgeFlashAlpha = 0.35;
+          sound.vault();
+          spawnShockRing(vaultTarget.x + vaultTarget.w * 0.5, vaultTarget.y - vaultTarget.h, '#b8ff00', 75, true);
+          spawnSpeedLines(14, '#b8ff00');
+          spawnSparks(runner.x + 24, runner.y - 44, 18, '#b8ff00', 1.25);
+          const vaultNames = ['KONG VAULT', 'SPEED VAULT', 'DASH VAULT', 'HAND-PLANT VAULT'];
+          const picked = vaultNames[Math.floor(Math.random() * vaultNames.length)];
+          triggerTrickBanner(picked, 'PERFECT PARKOUR FLOW', 180, 18);
+          addFloatingText(runner.x, runner.y - 95, picked + '!', '#b8ff00');
+          return;
+        }
+
+        // Normal jump or double-thruster-flip in mid-air
+        if (runner.onGround) {
+          runner.state = 'jump';
+          runner.vy = -660 - saveState.servosLvl * 20;
+          runner.onGround = false;
+          sound.jump();
+          spawnShockRing(runner.x, runner.y, '#00f3ff', 65, true);
+          spawnSparks(runner.x, runner.y, 12, '#00f3ff', 0.85);
+        } else if (runner.state === 'jump') {
+          runner.state = 'flip';
+          runner.vy = Math.min(runner.vy, -410);
+          runner.flipAngle = 0;
+          sound.vault();
+          spawnShockRing(runner.x, runner.y - 40, '#ff007f', 60, false);
+          spawnSparks(runner.x, runner.y - 30, 14, '#ff007f', 1.0);
+          triggerTrickBanner('CYBER THRUSTER FLIP', 'MID-AIR BOOST', 135, 10);
+        }
+      }
+
+      function actionSlide() {
+        if (!game.running || game.paused || game.cinematicMode) return;
+        sound.init();
+
+        if (runner.state === 'zipline') {
+          runner.state = 'jump';
+          runner.vy = 200;
+          runner.onGround = false;
+          runner.ziplineObj = null;
+          return;
+        }
+
+        if (!runner.onGround) {
+          // Fast-fall slam into power slide!
+          runner.vy = 960;
+          spawnShockRing(runner.x, runner.y, '#ff007f', 55, false);
+        } else {
+          spawnShockRing(runner.x, runner.y, '#ff007f', 60, true);
+        }
+        runner.state = 'slide';
+        runner.stateTimer = 0.66;
+        sound.slide();
+        spawnSpeedLines(8, '#ff007f');
+        spawnSparks(runner.x, runner.y, 14, '#ff007f', 0.9);
+      }
+
+      function actionSurge() {
+        if (!game.running || game.paused || game.cinematicMode) return;
+        sound.init();
+
+        if (game.surgeActiveTimer > 0) return;
+
+        if (game.surgeCooldown > 0) {
+          addFloatingText(runner.x, runner.y - 90, `PHASE COOLDOWN (${game.surgeCooldown.toFixed(1)}s)`, '#ffaa00');
+          return;
+        }
+
+        if (game.surgeEnergy < 55) {
+          addFloatingText(runner.x, runner.y - 90, 'LOW SURGE ENERGY (55% REQ)', '#ff007f');
+          return;
+        }
+
+        game.surgeEnergy = Math.max(0, game.surgeEnergy - 55);
+        // Shorter, tighter tactical phase shift duration (0.62s to 0.94s)
+        game.surgeActiveTimer = 0.54 + saveState.surgeLvl * 0.08;
+        // Longer cooldown after phase shift (5.6s down to 3.8s with upgrades)
+        game.surgeCooldown = Math.max(3.8, 6.0 - saveState.surgeLvl * 0.42);
+        runner.invulnTimer = game.surgeActiveTimer;
+        game.pursuitThreat = Math.max(4, game.pursuitThreat - 8);
+        game.cameraShake = 7;
+        game.dodgeFlashAlpha = 0.45;
+        sound.surge();
+        spawnShockRing(runner.x, runner.y - 40, '#b8ff00', 110, false);
+        spawnSpeedLines(18, '#b8ff00');
+        triggerTrickBanner('SANDEVISTAN PHASE SHIFT', 'TACTICAL BURST', 250, 0);
+        spawnSparks(runner.x, runner.y - 40, 24, '#b8ff00', 1.45);
+      }
+
+      function actionEmpPulse() {
+        if (!game.running || game.paused || game.cinematicMode) return;
+        sound.init();
+
+        if (game.empCooldown > 0) {
+          addFloatingText(runner.x, runner.y - 85, 'EMP RECHARGING', '#ffaa00');
+          return;
+        }
+
+        const empRadius = 265 + saveState.empLvl * 45;
+        game.empCooldown = Math.max(2.2, 4.5 - saveState.empLvl * 0.45);
+        game.empWaves.push({
+          x: runner.x + 20,
+          y: runner.y - 40,
+          r: 15,
+          maxR: empRadius,
+          alpha: 1.0
+        });
+        sound.emp();
+
+        let hackedCount = 0;
+        game.obstacles.forEach((o) => {
+          const dist = Math.abs(o.x - runner.x);
+          if (dist <= empRadius) {
+            if (o.type === 'laser_grid' && !o.disabled) {
+              o.disabled = true;
+              hackedCount++;
+              spawnSparks(o.x, o.y - 60, 20, '#00f3ff', 1.25);
+            }
+            if (o.type === 'hack_node' && !o.hacked) {
+              o.hacked = true;
+              hackedCount++;
+            }
+            if (o.type === 'holo_glass' && !o.shattered) {
+              o.shattered = true;
+              spawnGlassShatter(o.x, o.y, o.h);
+            }
+          }
+        });
+
+        game.pursuitThreat = Math.max(5, game.pursuitThreat - (10 + saveState.empLvl * 3));
+
+        if (hackedCount > 0) {
+          triggerTrickBanner('FIREWALL BREACHED', `DISABLED ${hackedCount} SECURITY NODE(S)`, 220, 20);
+          addFloatingText(runner.x + 30, runner.y - 100, 'GRID DISABLED!', '#00f3ff');
+        } else {
+          addFloatingText(runner.x + 20, runner.y - 95, 'EMP SHOCKWAVE!', '#ff007f');
+        }
+      }
+
+      // --- TRIGGER IN-CANVAS CAPTURE ANIMATION OR ESCAPE ANIMATION ---
+      function startCaptureSequence() {
+        if (game.cinematicMode) return;
+        game.cinematicMode = 'capturing';
+        game.cinematicTimer = 2.45; // 2.45s dramatic capture animation on canvas
+        runner.state = 'captured';
+        runner.vy = 0;
+        runner.y = runner.currentSurfaceY;
+        game.cameraShake = 15;
+        breachPrompt.classList.add('hidden');
+        sound.stopBgm();
+        sound.capture();
+        spawnShockRing(runner.x, runner.y - 40, '#ff0055', 130, false);
+        spawnSparks(runner.x, runner.y - 45, 32, '#ff0055', 1.5);
+        addFloatingText(runner.x, runner.y - 115, 'NEURAL STASIS LOCKED!', '#ff0055');
+      }
+
+      function startEscapeSequence() {
+        if (game.cinematicMode) return;
+        game.cinematicMode = 'escaping';
+        game.cinematicTimer = 2.2; // 2.2s dramatic breach & freedom animation
+        runner.state = 'escaped';
+        game.cameraShake = 12;
+        breachPrompt.classList.add('hidden');
+        sound.stopBgm();
+        sound.win();
+        spawnShockRing(runner.x + 30, runner.y - 50, '#b8ff00', 150, false);
+        spawnSpeedLines(28, '#b8ff00');
+        spawnSparks(runner.x + 20, runner.y - 45, 38, '#00f3ff', 1.6);
+        const msg = game.sector.id === 3 ? 'OUTER DOME SHIELD SHATTERED!' : 'RING PORTAL BREACHED!';
+        addFloatingText(runner.x, runner.y - 115, msg, '#b8ff00');
+      }
+
+      // --- UPDATE CINEMATIC CAPTURE OR ESCAPE SEQUENCE ---
+      function updateCinematic(dt) {
+        game.cinematicTimer -= dt;
+        if (game.cameraShake > 0) {
+          game.cameraShake = Math.max(0, game.cameraShake - dt * 14);
+        }
+
+        if (game.cinematicMode === 'capturing') {
+          // Enforcer drone swoops directly above/in front of runner and clamps stasis cage
+          const targetX = runner.x - 28;
+          const targetY = runner.y - 118;
+          enforcer.x += (targetX - enforcer.x) * Math.min(1, dt * 8);
+          enforcer.y += (targetY - enforcer.y) * Math.min(1, dt * 8);
+          enforcer.bobPhase += dt * 10;
+          runner.animPhase += dt * 6;
+
+          if (Math.random() < 0.45) {
+            spawnSparks(
+              runner.x + (Math.random() - 0.5) * 40,
+              runner.y - 20 - Math.random() * 50,
+              2,
+              '#ff0055',
+              0.7
+            );
+          }
+          if (game.cinematicTimer <= 0) {
+            game.cinematicMode = null;
+            finishRun(false);
+          }
+        } else if (game.cinematicMode === 'escaping') {
+          // Runner blasts forward with thrusters into freedom while drone shorts out behind
+          runner.x += 340 * dt;
+          runner.y -= 65 * dt;
+          runner.animPhase += dt * 18;
+          spawnSparks(runner.x - 15, runner.y - 25, 2, '#00f3ff', 0.9);
+          spawnSparks(runner.x - 15, runner.y - 45, 2, '#b8ff00', 0.9);
+
+          if (game.cinematicTimer <= 0) {
+            game.cinematicMode = null;
+            finishRun(true);
+          }
+        }
+
+        // Keep particles and shockwaves animating during cinematic
+        updateVisualEffects(dt, 80 * dt);
+      }
+
+      function updateVisualEffects(dt, moveDx) {
+        // Update scarf physics chain
+        const headX = runner.state === 'slide' ? runner.x - 16 : runner.x - 4;
+        const headY = runner.y - (runner.state === 'slide' ? 18 : runner.state === 'captured' ? 42 : 68);
+        if (runner.scarfNodes.length > 0) {
+          runner.scarfNodes[0].x = headX;
+          runner.scarfNodes[0].y = headY;
+          for (let i = 1; i < runner.scarfNodes.length; i++) {
+            const prev = runner.scarfNodes[i - 1];
+            const cur = runner.scarfNodes[i];
+            cur.x -= moveDx * 0.85;
+            cur.y += Math.sin(performance.now() * 0.012 + i * 0.9) * 1.4;
+            const dx = cur.x - prev.x;
+            const dy = cur.y - prev.y;
+            const dist = Math.hypot(dx, dy) || 1;
+            const segLen = 7.5;
+            if (dist > segLen) {
+              cur.x = prev.x + (dx / dist) * segLen;
+              cur.y = prev.y + (dy / dist) * segLen;
+            }
+          }
+        }
+
+        for (let i = game.particles.length - 1; i >= 0; i--) {
+          const p = game.particles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 420 * dt;
+          p.life -= dt;
+          if (p.life <= 0) game.particles.splice(i, 1);
+        }
+
+        for (let i = game.glassShards.length - 1; i >= 0; i--) {
+          const g = game.glassShards[i];
+          g.x += (g.vx - game.speed * 0.4) * dt;
+          g.y += g.vy * dt;
+          g.vy += 680 * dt;
+          g.rot += g.vRot * dt;
+          g.life -= dt;
+          if (g.life <= 0) game.glassShards.splice(i, 1);
+        }
+
+        for (let i = game.shockRings.length - 1; i >= 0; i--) {
+          const sr = game.shockRings[i];
+          sr.x -= moveDx * 0.5;
+          sr.r += (sr.maxR - sr.r) * Math.min(1, dt * 11);
+          sr.alpha -= dt * 2.4;
+          if (sr.alpha <= 0) game.shockRings.splice(i, 1);
+        }
+
+        for (let i = game.speedLines.length - 1; i >= 0; i--) {
+          const sl = game.speedLines[i];
+          sl.x -= sl.speed * dt;
+          sl.alpha -= dt * 1.8;
+          if (sl.alpha <= 0 || sl.x + sl.len < 0) game.speedLines.splice(i, 1);
+        }
+
+        for (let i = game.empWaves.length - 1; i >= 0; i--) {
+          const w = game.empWaves[i];
+          w.r += 760 * dt;
+          w.alpha = Math.max(0, 1 - w.r / w.maxR);
+          if (w.r >= w.maxR) game.empWaves.splice(i, 1);
+        }
+
+        for (let i = game.floatingTexts.length - 1; i >= 0; i--) {
+          const ft = game.floatingTexts[i];
+          ft.y -= 48 * dt;
+          ft.life -= dt * 1.1;
+          if (ft.life <= 0) game.floatingTexts.splice(i, 1);
+        }
+      }
+
+      // --- UPDATE GAME SIMULATION ---
+      function updateSimulation(dt) {
+        if (game.cinematicMode) {
+          updateCinematic(dt);
+          return;
+        }
+
+        if (game.dodgeFlashAlpha > 0) {
+          game.dodgeFlashAlpha = Math.max(0, game.dodgeFlashAlpha - dt * 1.8);
+        }
+
+        if (game.comboTimer > 0) {
+          game.comboTimer -= dt;
+          if (game.comboTimer <= 0) {
+            game.comboCount = 0;
+          }
+        }
+
+        if (game.empCooldown > 0) {
+          game.empCooldown = Math.max(0, game.empCooldown - dt);
+        }
+
+        if (game.surgeCooldown > 0 && game.surgeActiveTimer <= 0) {
+          game.surgeCooldown = Math.max(0, game.surgeCooldown - dt);
+        }
+
+        if (game.cameraShake > 0) {
+          game.cameraShake = Math.max(0, game.cameraShake - dt * 22);
+        }
+
+        // Surge active state
+        let speedMultiplier = 1.0;
+        if (game.surgeActiveTimer > 0) {
+          game.surgeActiveTimer -= dt;
+          speedMultiplier = 1.45;
+          if (Math.random() < 0.35) {
+            spawnSpeedLines(1, '#b8ff00');
+          }
+        } else {
+          // Slower energy recovery so Phase Shift requires careful timing
+          const regenRate = game.surgeCooldown > 0 ? (1.8 + saveState.surgeLvl * 0.4) : (3.4 + saveState.surgeLvl * 0.7);
+          game.surgeEnergy = Math.min(100, game.surgeEnergy + regenRate * dt);
+        }
+
+        if (runner.stumbleTimer > 0) {
+          runner.stumbleTimer -= dt;
+          speedMultiplier *= 0.65;
+        }
+        if (runner.invulnTimer > 0) {
+          runner.invulnTimer -= dt;
+        }
+
+        const targetBase = game.sector.baseSpeed + Math.min(180, game.distance * 0.085);
+        game.speed = targetBase * speedMultiplier;
+
+        const moveDx = game.speed * dt;
+        game.distance += moveDx / 12;
+
+        // Threat creep or decay
+        if (runner.stumbleTimer > 0) {
+          game.pursuitThreat += 24 * dt;
+        } else if (game.surgeActiveTimer > 0) {
+          game.pursuitThreat = Math.max(5, game.pursuitThreat - 10 * dt);
+        } else {
+          game.pursuitThreat += 1.65 * dt;
+        }
+
+        if (game.pursuitThreat >= 100) {
+          game.pursuitThreat = 100;
+          updateHUD();
+          startCaptureSequence();
+          return;
+        }
+
+        // Update parallax buildings
+        game.bgBuildingsFar.forEach((b) => {
+          b.x -= moveDx * 0.14;
+        });
+        if (game.bgBuildingsFar.length && game.bgBuildingsFar[0].x + game.bgBuildingsFar[0].w < -50) {
+          const first = game.bgBuildingsFar.shift();
+          const last = game.bgBuildingsFar[game.bgBuildingsFar.length - 1];
+          first.x = last.x + last.w + 15 + Math.random() * 25;
+          game.bgBuildingsFar.push(first);
+        }
+
+        game.bgBuildingsMid.forEach((b) => {
+          b.x -= moveDx * 0.34;
+        });
+        if (game.bgBuildingsMid.length && game.bgBuildingsMid[0].x + game.bgBuildingsMid[0].w < -50) {
+          const first = game.bgBuildingsMid.shift();
+          const last = game.bgBuildingsMid.length ? game.bgBuildingsMid[game.bgBuildingsMid.length - 1] : { x: game.width, w: 100 };
+          first.x = last.x + last.w + 25 + Math.random() * 40;
+          game.bgBuildingsMid.push(first);
+        }
+
+        game.bgSigns.forEach((s) => {
+          s.x -= moveDx * 0.5;
+          if (s.x < -180) s.x += game.width + 450;
+        });
+
+        if (game.sector.rain) {
+          game.rainDrops.forEach((r) => {
+            r.x -= (moveDx * 0.8 + 140 * dt);
+            r.y += r.speed * dt;
+            if (r.y > game.height) {
+              r.y = -20;
+              r.x = Math.random() * (game.width + 200);
+            }
+          });
+        }
+
+        // Spawn ahead
+        game.nextSpawnX -= moveDx;
+        while (game.nextSpawnX < game.width * 1.8) {
+          game.nextSpawnX = spawnObstaclePattern(game.nextSpawnX);
+        }
+
+        // Runner physics & state machine
+        runner.animPhase += dt * (game.speed / 36);
+
+        if (runner.state === 'zipline' && runner.ziplineObj) {
+          runner.y = runner.ziplineObj.y + 72;
+          runner.vy = 0;
+          spawnSparks(runner.x, runner.ziplineObj.y + 4, 2, '#ffaa00', 0.65);
+          if (runner.x > runner.ziplineObj.x + runner.ziplineObj.w) {
+            runner.state = 'jump';
+            runner.onGround = false;
+            runner.ziplineObj = null;
+          }
+        } else {
+          let supportY = game.groundY;
+          for (let i = 0; i < game.obstacles.length; i++) {
+            const o = game.obstacles[i];
+            if (
+              o.type === 'catwalk' &&
+              runner.x + 15 >= o.x &&
+              runner.x - 15 <= o.x + o.w &&
+              runner.y <= o.y + 22 &&
+              runner.vy >= 0
+            ) {
+              supportY = o.y;
+              break;
+            }
+          }
+          runner.currentSurfaceY = supportY;
+
+          runner.vy += 1780 * dt;
+          runner.y += runner.vy * dt;
+
+          if (runner.y >= runner.currentSurfaceY) {
+            const landingSpeed = runner.vy;
+            runner.y = runner.currentSurfaceY;
+            runner.vy = 0;
+            if (!runner.onGround) {
+              runner.onGround = true;
+              if (landingSpeed > 450) {
+                spawnShockRing(runner.x, runner.y, '#00f3ff', 50, true);
+                spawnSparks(runner.x, runner.y, 8, '#00f3ff', 0.7);
+              }
+              if (runner.state === 'jump' || runner.state === 'flip' || runner.state === 'vault') {
+                runner.state = 'run';
+              }
+            }
+          } else {
+            runner.onGround = false;
+          }
+
+          if (runner.state === 'slide' || runner.state === 'vault') {
+            runner.stateTimer -= dt;
+            if (runner.state === 'slide' && runner.onGround) {
+              spawnSparks(runner.x - 14, runner.y - 2, 2, '#ff007f', 0.55);
+            }
+            if (runner.stateTimer <= 0 && runner.onGround) {
+              runner.state = 'run';
+            }
+          }
+
+          if (runner.state === 'flip') {
+            runner.flipAngle += dt * 12.0;
+          }
+        }
+
+        // Record Sandevistan / Neon Ghost Trail
+        if (Math.random() < 0.7 || game.surgeActiveTimer > 0 || runner.state !== 'run') {
+          runner.ghostTrail.push({
+            x: runner.x,
+            y: runner.y,
+            state: runner.state,
+            animPhase: runner.animPhase,
+            flipAngle: runner.flipAngle,
+            alpha: game.surgeActiveTimer > 0 ? 0.65 : runner.state !== 'run' ? 0.45 : 0.26
+          });
+          if (runner.ghostTrail.length > 10) {
+            runner.ghostTrail.shift();
+          }
+        }
+        runner.ghostTrail.forEach((g) => {
+          g.x -= moveDx;
+          g.alpha -= dt * 1.45;
+        });
+        runner.ghostTrail = runner.ghostTrail.filter((g) => g.alpha > 0.02);
+
+        let showHackHint = false;
+        const rHeight = runner.state === 'slide' ? 24 : 78;
+        const rTop = runner.y - rHeight;
+        const rLeft = runner.x - 16;
+        const rRight = runner.x + 18;
+
+        for (let i = game.obstacles.length - 1; i >= 0; i--) {
+          const o = game.obstacles[i];
+          o.x -= moveDx;
+
+          if (o.type === 'extraction_portal') {
+            if (o.x <= runner.x + 24) {
+              startEscapeSequence();
+              return;
+            }
+            continue;
+          }
+
+          if (o.type === 'laser_grid' && !o.disabled && o.x - runner.x > 0 && o.x - runner.x < 240) {
+            showHackHint = true;
+          }
+
+          // Zipline auto-grab
+          if (
+            o.type === 'zipline' &&
+            runner.state !== 'zipline' &&
+            runner.x >= o.x - 15 &&
+            runner.x <= o.x + o.w - 30 &&
+            Math.abs(rTop - o.y) < 42
+          ) {
+            runner.state = 'zipline';
+            runner.ziplineObj = o;
+            sound.vault();
+            spawnShockRing(runner.x, o.y, '#ffaa00', 55, false);
+            triggerTrickBanner('MAG-RAIL ZIPLINE GRIND', 'HIGH VOLTAGE BYPASS', 175, 12);
+            continue;
+          }
+
+          // Jump pad launch
+          if (
+            o.type === 'jump_pad' &&
+            !o.used &&
+            rRight >= o.x &&
+            rLeft <= o.x + o.w &&
+            Math.abs(runner.y - o.y) < 26
+          ) {
+            o.used = true;
+            runner.state = 'flip';
+            runner.vy = -840;
+            runner.onGround = false;
+            runner.flipAngle = 0;
+            sound.vault();
+            spawnShockRing(o.x + o.w / 2, o.y, '#b8ff00', 85, true);
+            spawnSpeedLines(16, '#b8ff00');
+            spawnSparks(o.x + o.w / 2, o.y, 20, '#b8ff00', 1.35);
+            triggerTrickBanner('REPULSOR LAUNCH FLIP', 'HIGH ALTITUDE ROUTE', 210, 16);
+            continue;
+          }
+
+          // Breakable Holo-Glass Window
+          if (
+            o.type === 'holo_glass' &&
+            !o.shattered &&
+            rRight >= o.x &&
+            rLeft <= o.x + o.w &&
+            runner.y > o.y - o.h
+          ) {
+            o.shattered = true;
+            spawnGlassShatter(o.x, o.y, o.h);
+            spawnSpeedLines(10, '#00f3ff');
+            triggerTrickBanner('SHIELD BREACH', 'HOLO-GLASS SHATTER', 140, 10);
+            continue;
+          }
+
+          // Vault terminal collision
+          if (o.type === 'vault_terminal' && !o.hit && !o.vaulted) {
+            const boxTop = o.y - o.h;
+            if (rRight > o.x + 8 && rLeft < o.x + o.w - 6 && runner.y > boxTop + 8) {
+              if (game.surgeActiveTimer > 0 || runner.y < o.y - o.h * 0.45) {
+                o.vaulted = true;
+                runner.state = 'vault';
+                runner.stateTimer = 0.36;
+                runner.vy = -450;
+                sound.vault();
+                spawnShockRing(o.x + o.w * 0.5, boxTop, '#00f3ff', 65, true);
+                triggerTrickBanner('REFLEX VAULT', 'AUTO-CLEAR', 150, 10);
+              } else if (runner.invulnTimer <= 0) {
+                o.hit = true;
+                handleStumble('CLIPPED TERMINAL');
+              }
+            }
+          }
+
+          // Overhead blast door collision & Close Dodge detection
+          if (o.type === 'overhead_gate' && !o.hit) {
+            if (rRight > o.x + 8 && rLeft < o.x + o.w - 8 && rTop < o.y && runner.y > o.y - o.h) {
+              if (game.surgeActiveTimer > 0 || runner.invulnTimer > 0) {
+                o.hit = true;
+              } else {
+                o.hit = true;
+                handleStumble('LOW CLEARANCE HIT');
+              }
+            } else if (!o.passed && o.x + o.w < runner.x && runner.state === 'slide') {
+              o.passed = true;
+              game.dodgeFlashAlpha = 0.32;
+              sound.dodge();
+              spawnSpeedLines(12, '#ff007f');
+              addFloatingText(runner.x, runner.y - 70, 'PHANTOM DODGE!', '#ff007f');
+              triggerTrickBanner('PLASMA POWER DODGE', 'RAZOR CLEARANCE', 150, 14);
+            }
+          }
+
+          // Laser Grid collision
+          if (o.type === 'laser_grid' && !o.disabled && !o.hit) {
+            if (rRight > o.x && rLeft < o.x + o.w && runner.y > o.y - o.h) {
+              if (game.surgeActiveTimer > 0 || runner.invulnTimer > 0) {
+                o.disabled = true;
+                spawnSparks(o.x, o.y - 50, 16, '#b8ff00', 1.15);
+                triggerTrickBanner('PHASE DASH THROUGH LASER', 'ZERO DAMAGE', 190, 0);
+              } else {
+                o.hit = true;
+                handleStumble('LASER SECURITY SHOCK');
+              }
+            }
+          }
+
+          // Shock floor hazard
+          if (o.type === 'shock_floor' && !o.hit) {
+            if (rRight > o.x + 10 && rLeft < o.x + o.w - 10 && Math.abs(runner.y - o.y) < 12) {
+              if (game.surgeActiveTimer <= 0 && runner.invulnTimer <= 0) {
+                o.hit = true;
+                handleStumble('HIGH-VOLTAGE FLOOR');
+              }
+            }
+          }
+
+          if (o.x + (o.w || 100) < -200) {
+            game.obstacles.splice(i, 1);
+          }
+        }
+
+        breachPrompt.classList.toggle('hidden', !showHackHint);
+
+        // Update collectibles
+        for (let i = game.collectibles.length - 1; i >= 0; i--) {
+          const c = game.collectibles[i];
+          c.x -= moveDx;
+
+          const dx = c.x - runner.x;
+          const dy = c.y - (runner.y - rHeight * 0.5);
+          const dist = Math.hypot(dx, dy);
+
+          if (!c.collected && dist < c.r + 36) {
+            c.collected = true;
+            if (c.type === 'shard') {
+              game.shardsEarned += 10;
+              saveState.shards += 10;
+              game.surgeEnergy = Math.min(100, game.surgeEnergy + 4);
+              sound.shard();
+              spawnSparks(c.x, c.y, 7, '#ffaa00', 0.7);
+            } else if (c.type === 'key') {
+              game.keysCollected = Math.min(3, game.keysCollected + 1);
+              game.shardsEarned += 50;
+              saveState.shards += 50;
+              game.pursuitThreat = Math.max(5, game.pursuitThreat - 8);
+              sound.keyPickup();
+              spawnShockRing(c.x, c.y, '#00f3ff', 75, false);
+              spawnSparks(c.x, c.y, 22, '#00f3ff', 1.3);
+              triggerTrickBanner(`DECRYPTION KEY ${game.keysCollected}/3`, 'RING NODE UNLOCKED', 300, 25);
+              addFloatingText(c.x, c.y - 20, `KEY ${game.keysCollected}/3 ACQUIRED!`, '#00f3ff');
+            }
+          }
+
+          if (c.collected || c.x < -100) {
+            game.collectibles.splice(i, 1);
+          }
+        }
+
+        updateVisualEffects(dt, moveDx);
+
+        // Update Pursuing Enforcer Drone position
+        const minDroneX = 32;
+        const maxDroneX = runner.x - 42;
+        enforcer.x = minDroneX + (maxDroneX - minDroneX) * (game.pursuitThreat / 100);
+        enforcer.bobPhase += dt * 5.5;
+        enforcer.rotorPhase += dt * 24;
+        enforcer.y = runner.y - 94 + Math.sin(enforcer.bobPhase) * 14;
+
+        updateHUD();
+      }
+
+      function handleStumble(reason) {
+        sound.stumble();
+        runner.stumbleTimer = 0.65;
+        runner.invulnTimer = 1.05;
+        game.comboCount = 0;
+        game.pursuitThreat = Math.min(100, game.pursuitThreat + 24);
+        game.cameraShake = 12;
+        spawnShockRing(runner.x, runner.y - 40, '#ff0055', 75, false);
+        spawnSparks(runner.x, runner.y - 40, 22, '#ff0055', 1.25);
+        addFloatingText(runner.x, runner.y - 95, `STUMBLE! ${reason}`, '#ff0055');
+      }
+
+      // --- UPDATE TOP HUD ---
+      function updateHUD() {
+        hudPursuitBar.style.width = `${Math.min(100, Math.round(game.pursuitThreat))}%`;
+        hudSurgeBar.style.width = `${Math.round(game.surgeEnergy)}%`;
+        hudShards.textContent = saveState.shards;
+        hudDistance.textContent = Math.floor(game.distance);
+
+        const pct = Math.min(100, (game.distance / game.sector.targetDist) * 100);
+        hudProgressLine.style.width = `${pct}%`;
+
+        const cleared = getClearedCount();
+        if (hudEnclosureLocks) {
+          hudEnclosureLocks.textContent =
+            cleared >= 4 ? 'ENCLOSURE: ESCAPED ★' : `ENCLOSURE LOCKS: ${cleared}/4`;
+        }
+
+        const keySpans = hudKeysContainer.children;
+        for (let i = 0; i < 3; i++) {
+          if (i < game.keysCollected) {
+            keySpans[i].className =
+              'w-2.5 h-2.5 rounded-xs border border-cyan-300 bg-cyan-400 shadow-[0_0_8px_#00f3ff] inline-block';
+          } else {
+            keySpans[i].className =
+              'w-2.5 h-2.5 rounded-xs border border-cyan-400/50 bg-cyan-400/15 inline-block';
+          }
+        }
+      }
+
+      // --- FINISH SECTOR OR CAPTURED ---
+      function finishRun(escaped) {
+        game.running = false;
+        sound.stopBgm();
+
+        if (Math.floor(game.distance) > saveState.bestEndless) {
+          saveState.bestEndless = Math.floor(game.distance);
+        }
+
+        if (escaped) {
+          saveState.clearedSectors[selectedSectorIdx] = true;
+          const keyBonus = game.keysCollected * 75 + (selectedSectorIdx === 3 ? 250 : 0);
+          game.shardsEarned += keyBonus;
+          saveState.shards += keyBonus;
+        }
+        writeSave();
+
+        const clearedCount = getClearedCount();
+        const allFourCleared = clearedCount === 4;
+
+        const badge = document.getElementById('outcomeBadge');
+        const title = document.getElementById('outcomeTitle');
+        const desc = document.getElementById('outcomeDesc');
+        const locksText = document.getElementById('outcomeLocksText');
+        const locksGrid = document.getElementById('outcomeLocksGrid');
+
+        locksText.textContent = `${clearedCount} / 4 RINGS BREACHED`;
+        for (let i = 0; i < 4; i++) {
+          locksGrid.children[i].className = saveState.clearedSectors[i]
+            ? 'h-2 rounded-xs bg-lime-400 shadow-[0_0_8px_#b8ff00]'
+            : 'h-2 rounded-xs bg-slate-800';
+        }
+
+        if (escaped) {
+          if (allFourCleared || selectedSectorIdx === 3) {
+            badge.textContent = 'FINAL CONTAINMENT WALL SHATTERED // 4/4 RINGS';
+            badge.className =
+              'inline-block mx-auto px-3 py-0.5 rounded text-xs font-mono-tech font-bold bg-amber-500/25 border border-amber-400 text-amber-300';
+            title.textContent = 'ESCAPED THE ENCLOSURE!';
+            title.className = 'font-cyber text-2xl sm:text-3xl font-black text-lime-300 text-glow-lime';
+            desc.textContent =
+              'You breached all four security rings of the Aether-9 Biodome Enclosure, shattered the Outer Dome Shield, and broke free into the open cyber-skyline!';
+          } else {
+            badge.textContent = `${game.sector.code} // RING BREACHED`;
+            badge.className =
+              'inline-block mx-auto px-3 py-0.5 rounded text-xs font-mono-tech font-bold bg-lime-500/20 border border-lime-400 text-lime-300';
+            title.textContent = `RING 0${selectedSectorIdx + 1} CLEARED!`;
+            title.className = 'font-cyber text-2xl sm:text-3xl font-black text-lime-300 text-glow-lime';
+            desc.textContent = `You outran the APEX Enforcer with ${game.keysCollected}/3 Decryption Keys! Advance to Ring 0${selectedSectorIdx + 2} to push closer to the Outer Enclosure Wall.`;
+          }
+          btnOutcomeNext.classList.toggle('hidden', selectedSectorIdx >= 3);
+        } else {
+          badge.textContent = 'STASIS CAGE LOCKED // CONTAINMENT PROTOCOL';
+          badge.className =
+            'inline-block mx-auto px-3 py-0.5 rounded text-xs font-mono-tech font-bold bg-pink-500/20 border border-pink-500 text-pink-300';
+          title.textContent = 'CAPTURED IN STASIS!';
+          title.className = 'font-cyber text-2xl sm:text-3xl font-black text-pink-400 text-glow-pink';
+          desc.textContent =
+            'The APEX-7 Enforcer Drone clamped a neural stasis cage around you. Chain Kong-Vaults [SPACE], Dodge-Slides [S], and Phase Surges [SHIFT] to break pursuit!';
+          btnOutcomeNext.classList.add('hidden');
+        }
+
+        document.getElementById('statFinalDist').textContent = `${Math.floor(game.distance)}m`;
+        document.getElementById('statFinalTricks').textContent = `${game.tricksCount} FLOW`;
+        document.getElementById('statFinalShards').textContent = `+₿ ${game.shardsEarned}`;
+
+        outcomeModal.classList.remove('hidden');
+      }
+
+      // ============================================================================
+      // UPGRADED CYBERPUNK GRAPHICS & ASSET RENDERER
+      // ============================================================================
+      function renderScene() {
+        ctx.save();
+
+        if (game.cameraShake > 0) {
+          const sx = (Math.random() - 0.5) * game.cameraShake;
+          const sy = (Math.random() - 0.5) * game.cameraShake;
+          ctx.translate(sx, sy);
+        }
+
+        const now = performance.now();
+
+        // 1. Cyber Sky Gradient + Giant Enclosure Biodome Hex Grid Overhead
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, game.groundY);
+        skyGrad.addColorStop(0, game.sector.skyTop);
+        skyGrad.addColorStop(1, game.sector.skyBot);
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, game.width, game.height);
+
+        // Draw Giant Curved Enclosure Biodome Ribs in the Sky
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 243, 255, 0.07)';
+        ctx.lineWidth = 2;
+        for (let r = 220; r < game.width * 1.1; r += 160) {
+          ctx.beginPath();
+          ctx.arc(game.width * 0.5, game.groundY + 120, r, Math.PI * 1.05, Math.PI * 1.95);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Synthwave Reactor Core Orb in Sky
+        const orbX = game.width * 0.76;
+        const orbY = game.groundY * 0.38;
+        const orbGrad = ctx.createRadialGradient(orbX, orbY, 12, orbX, orbY, 145);
+        orbGrad.addColorStop(0, 'rgba(255, 0, 127, 0.36)');
+        orbGrad.addColorStop(0.55, 'rgba(0, 243, 255, 0.14)');
+        orbGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = orbGrad;
+        ctx.beginPath();
+        ctx.arc(orbX, orbY, 145, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Far Parallax Megacity Skyline
+        game.bgBuildingsFar.forEach((b) => {
+          const topY = game.groundY - b.h;
+          ctx.fillStyle = '#070b19';
+          ctx.fillRect(b.x, topY, b.w, b.h);
+          ctx.strokeStyle = 'rgba(0, 243, 255, 0.14)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(b.x, topY, b.w, b.h);
+
+          ctx.fillStyle = b.winSeed % 2 === 0 ? 'rgba(0, 243, 255, 0.25)' : 'rgba(255, 0, 127, 0.22)';
+          for (let wy = topY + 14; wy < game.groundY - 20; wy += 22) {
+            ctx.fillRect(b.x + 10, wy, b.w - 20, 3);
+          }
+        });
+
+        // 3. Mid Parallax Buildings & Holographic Enclosure Towers
+        game.bgBuildingsMid.forEach((b) => {
+          const topY = game.groundY - b.h;
+          const bGrad = ctx.createLinearGradient(b.x, topY, b.x + b.w, game.groundY);
+          bGrad.addColorStop(0, '#0d152c');
+          bGrad.addColorStop(1, '#080c1a');
+          ctx.fillStyle = bGrad;
+          ctx.fillRect(b.x, topY, b.w, b.h);
+          ctx.strokeStyle = b.hue === 'cyan' ? 'rgba(0, 243, 255, 0.32)' : 'rgba(255, 0, 127, 0.32)';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(b.x, topY, b.w, b.h);
+
+          if (b.hasAntenna) {
+            ctx.beginPath();
+            ctx.moveTo(b.x + b.w * 0.5, topY);
+            ctx.lineTo(b.x + b.w * 0.5, topY - 38);
+            ctx.stroke();
+            ctx.fillStyle = '#ff0055';
+            ctx.beginPath();
+            ctx.arc(b.x + b.w * 0.5, topY - 38, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+
+        // Floating Holo-Billboards
+        game.bgSigns.forEach((s) => {
+          ctx.save();
+          ctx.fillStyle = 'rgba(6, 12, 28, 0.82)';
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = 1.5;
+          ctx.fillRect(s.x, s.y, 126, 34);
+          ctx.strokeRect(s.x, s.y, 126, 34);
+          ctx.fillStyle = s.color;
+          ctx.font = 'bold 11px Orbitron, sans-serif';
+          ctx.fillText(s.text, s.x + 10, s.y + 21);
+          ctx.restore();
+        });
+
+        // 4. Perspective Floor Deck & Neon Grid
+        const floorGrad = ctx.createLinearGradient(0, game.groundY, 0, game.height);
+        floorGrad.addColorStop(0, '#0b1024');
+        floorGrad.addColorStop(1, '#04050c');
+        ctx.fillStyle = floorGrad;
+        ctx.fillRect(0, game.groundY, game.width, game.height - game.groundY);
+
+        ctx.strokeStyle = game.sector.accent;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, game.groundY);
+        ctx.lineTo(game.width, game.groundY);
+        ctx.stroke();
+
+        const gridOffset = (game.distance * 12) % 60;
+        ctx.strokeStyle = game.sector.gridColor;
+        ctx.lineWidth = 1.2;
+        for (let gx = -gridOffset; gx < game.width; gx += 60) {
+          ctx.beginPath();
+          ctx.moveTo(gx, game.groundY);
+          ctx.lineTo(gx - 95, game.height);
+          ctx.stroke();
+        }
+
+        // 5. Render Detailed Cyberpunk Obstacles & Escape Structures
+        game.obstacles.forEach((o) => {
+          if (o.x + (o.w || 130) < -70 || o.x > game.width + 110) return;
+
+          if (o.type === 'vault_terminal') {
+            // High-Detail 3D Beveled Cryo/Quantum Server Unit
+            const topY = o.y - o.h;
+            const mainCol = o.vaulted ? '#b8ff00' : '#00f3ff';
+            const bodyGrad = ctx.createLinearGradient(o.x, topY, o.x, o.y);
+            bodyGrad.addColorStop(0, '#17254a');
+            bodyGrad.addColorStop(1, '#090e21');
+            ctx.fillStyle = bodyGrad;
+            ctx.fillRect(o.x, topY, o.w, o.h);
+
+            // Top beveled metallic cap
+            ctx.fillStyle = mainCol;
+            ctx.fillRect(o.x - 2, topY, o.w + 4, 5);
+
+            ctx.strokeStyle = mainCol;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(o.x, topY, o.w, o.h);
+
+            // Animated server data bars & core LED
+            ctx.fillStyle = mainCol;
+            const barW = ((now * 0.04) % (o.w - 20)) + 8;
+            ctx.fillRect(o.x + 8, topY + 14, barW, 4);
+            ctx.fillRect(o.x + 8, topY + 24, o.w - 22, 4);
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.2)';
+            ctx.fillRect(o.x + 8, topY + 34, o.w - 16, 12);
+
+            ctx.fillStyle = mainCol;
+            ctx.font = 'bold 10px JetBrains Mono, monospace';
+            ctx.fillText(o.vaulted ? '✓ CLEARED' : '▲ VAULT', o.x + 6, topY - 7);
+          } else if (o.type === 'overhead_gate') {
+            // Heavy Hydraulic Plasma Blast Door with Emitter Coils
+            const topY = o.y - o.h;
+            const gateGrad = ctx.createLinearGradient(o.x, topY, o.x + o.w, topY);
+            gateGrad.addColorStop(0, '#180c29');
+            gateGrad.addColorStop(0.5, '#2b1347');
+            gateGrad.addColorStop(1, '#180c29');
+            ctx.fillStyle = gateGrad;
+            ctx.fillRect(o.x, topY, o.w, o.h);
+
+            ctx.strokeStyle = '#ff007f';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(o.x, topY, o.w, o.h);
+
+            // Internal hydraulic ribs
+            ctx.strokeStyle = 'rgba(255, 0, 127, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(o.x + 14, topY);
+            ctx.lineTo(o.x + 14, o.y - 10);
+            ctx.moveTo(o.x + o.w - 14, topY);
+            ctx.lineTo(o.x + o.w - 14, o.y - 10);
+            ctx.stroke();
+
+            // Glowing Plasma Emitter Edge & Crackling Arcs below door
+            ctx.fillStyle = '#ff007f';
+            ctx.fillRect(o.x - 2, o.y - 10, o.w + 4, 10);
+            ctx.strokeStyle = '#ff80bf';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(o.x + 6, o.y + 3);
+            for (let px = o.x + 16; px < o.x + o.w - 4; px += 14) {
+              ctx.lineTo(px, o.y + 2 + Math.sin(now * 0.03 + px) * 4);
+            }
+            ctx.stroke();
+
+            ctx.font = 'bold 10px JetBrains Mono, monospace';
+            ctx.fillStyle = '#ff80bf';
+            ctx.fillText('▼ DODGE SLIDE', o.x + 8, o.y + 18);
+          } else if (o.type === 'holo_glass' && !o.shattered) {
+            // Laser-Etched Forcefield Glass Partition with Scanning Line
+            const topY = o.y - o.h;
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.24)';
+            ctx.fillRect(o.x, topY, o.w, o.h);
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 2.2;
+            ctx.strokeRect(o.x, topY, o.w, o.h);
+
+            // Moving laser scan bar inside glass
+            const scanY = topY + ((now * 0.08) % o.h);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(o.x + 2, scanY, o.w - 4, 3);
+
+            // Specular diagonal reflections
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(o.x + 3, topY + 15);
+            ctx.lineTo(o.x + o.w - 3, topY + 45);
+            ctx.moveTo(o.x + 3, topY + 65);
+            ctx.lineTo(o.x + o.w - 3, topY + 95);
+            ctx.stroke();
+          } else if (o.type === 'laser_grid') {
+            // Dual-Emitter Security Laser Matrix
+            const topY = o.y - o.h;
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(o.x - 5, topY, o.w + 10, 12);
+            ctx.fillRect(o.x - 5, o.y - 10, o.w + 10, 10);
+
+            if (!o.disabled) {
+              ctx.strokeStyle = '#ff0055';
+              ctx.lineWidth = 3;
+              for (let lx = o.x + 4; lx <= o.x + o.w - 4; lx += 8) {
+                ctx.beginPath();
+                ctx.moveTo(lx, topY + 12);
+                ctx.lineTo(lx, o.y - 10);
+                ctx.stroke();
+              }
+              // Cross laser nodes
+              ctx.strokeStyle = 'rgba(255, 170, 0, 0.7)';
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.moveTo(o.x + 4, topY + 35);
+              ctx.lineTo(o.x + o.w - 4, topY + 65);
+              ctx.moveTo(o.x + 4, topY + 85);
+              ctx.lineTo(o.x + o.w - 4, topY + 55);
+              ctx.stroke();
+
+              ctx.fillStyle = '#ff0055';
+              ctx.font = 'bold 10px JetBrains Mono, monospace';
+              ctx.fillText('⚡ [E] EMP', o.x - 16, topY - 8);
+            } else {
+              ctx.fillStyle = '#b8ff00';
+              ctx.font = 'bold 10px JetBrains Mono, monospace';
+              ctx.fillText('BREACHED', o.x - 12, topY - 8);
+            }
+          } else if (o.type === 'hack_node') {
+            const topY = o.y - o.h;
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(o.x, topY, o.w, o.h);
+            ctx.strokeStyle = o.hacked ? '#b8ff00' : '#ff007f';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(o.x, topY, o.w, o.h);
+            // Rotating holo-ring above terminal
+            ctx.beginPath();
+            ctx.arc(o.x + o.w * 0.5, topY - 12, 8, (now * 0.005) % Math.PI, ((now * 0.005) % Math.PI) + 4);
+            ctx.stroke();
+          } else if (o.type === 'jump_pad') {
+            // Repulsor Lift Pad with rising anti-grav rings
+            ctx.fillStyle = '#b8ff00';
+            ctx.fillRect(o.x, o.y - o.h, o.w, o.h);
+            const waveY = o.y - o.h - ((now * 0.05) % 24);
+            ctx.strokeStyle = 'rgba(184, 255, 0, 0.65)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(o.x + 4, waveY);
+            ctx.lineTo(o.x + o.w - 4, waveY);
+            ctx.stroke();
+            ctx.fillStyle = '#b8ff00';
+            ctx.font = 'bold 10px JetBrains Mono, monospace';
+            ctx.fillText('▲ LAUNCH', o.x - 2, o.y - o.h - 26);
+          } else if (o.type === 'catwalk') {
+            // Trussed Cyberpunk Sky-Bridge Catwalk
+            ctx.fillStyle = '#111c38';
+            ctx.fillRect(o.x, o.y, o.w, o.h);
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(o.x, o.y, o.w, o.h);
+            // Diagonal metallic truss pattern
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.35)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            for (let tx = o.x; tx < o.x + o.w - 20; tx += 24) {
+              ctx.moveTo(tx, o.y);
+              ctx.lineTo(tx + 12, o.y + o.h);
+              ctx.lineTo(tx + 24, o.y);
+            }
+            ctx.stroke();
+          } else if (o.type === 'zipline') {
+            ctx.strokeStyle = '#ffaa00';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(o.x, o.y);
+            ctx.lineTo(o.x + o.w, o.y);
+            ctx.stroke();
+            // Pylon ends
+            ctx.fillStyle = '#ffaa00';
+            ctx.fillRect(o.x - 4, o.y - 8, 8, 16);
+            ctx.fillRect(o.x + o.w - 4, o.y - 8, 8, 16);
+            ctx.font = 'bold 10px JetBrains Mono, monospace';
+            ctx.fillText('▲ MAG-ZIPLINE', o.x + 12, o.y - 10);
+          } else if (o.type === 'shock_floor') {
+            ctx.fillStyle = 'rgba(255, 0, 85, 0.38)';
+            ctx.fillRect(o.x, o.y - 8, o.w, 8);
+            ctx.strokeStyle = '#ff0055';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let sx = o.x; sx < o.x + o.w; sx += 14) {
+              ctx.lineTo(sx + 7, o.y - 4 - Math.random() * 10);
+            }
+            ctx.stroke();
+          } else if (o.type === 'extraction_portal') {
+            // Massive Ring Gate or Final Outer Enclosure Dome Wall Breach Gate
+            const topY = o.y - o.h;
+            const grad = ctx.createLinearGradient(o.x, topY, o.x + o.w, o.y);
+            if (o.isFinalDomeWall) {
+              grad.addColorStop(0, 'rgba(255, 170, 0, 0.85)');
+              grad.addColorStop(0.5, 'rgba(184, 255, 0, 0.85)');
+              grad.addColorStop(1, 'rgba(0, 243, 255, 0.85)');
+            } else {
+              grad.addColorStop(0, 'rgba(0, 243, 255, 0.78)');
+              grad.addColorStop(0.5, 'rgba(184, 255, 0, 0.68)');
+              grad.addColorStop(1, 'rgba(255, 0, 127, 0.78)');
+            }
+            ctx.fillStyle = grad;
+            ctx.fillRect(o.x, topY, o.w, o.h);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3.5;
+            ctx.strokeRect(o.x, topY, o.w, o.h);
+
+            // Spinning portal vortex rings inside gate
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(o.x + o.w * 0.5, topY + o.h * 0.5, o.w * 0.32, o.h * 0.38, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Orbitron, sans-serif';
+            ctx.fillText(
+              o.isFinalDomeWall ? 'OUTER ENCLOSURE BREACH GATE' : 'RING EXTRACTION PORTAL',
+              o.x - 45,
+              topY - 14
+            );
+          }
+        });
+
+        // 6. Render Collectibles (Data Shards & Decryption Keys)
+        const pulse = Math.sin(now * 0.008) * 3;
+        game.collectibles.forEach((c) => {
+          if (c.x < -30 || c.x > game.width + 30) return;
+          ctx.save();
+          ctx.translate(c.x, c.y);
+          if (c.type === 'shard') {
+            ctx.rotate(now * 0.004);
+            ctx.fillStyle = '#ffaa00';
+            ctx.strokeStyle = '#fff3b0';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -c.r);
+            ctx.lineTo(c.r, 0);
+            ctx.lineTo(0, c.r);
+            ctx.lineTo(-c.r, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          } else if (c.type === 'key') {
+            const r = c.r + pulse;
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.28)';
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let side = 0; side < 6; side++) {
+              const ang = (side * Math.PI) / 3;
+              const kx = Math.cos(ang) * r;
+              const ky = Math.sin(ang) * r;
+              if (side === 0) ctx.moveTo(kx, ky);
+              else ctx.lineTo(kx, ky);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px Orbitron, sans-serif';
+            ctx.fillText('KEY', -12, 4);
+          }
+          ctx.restore();
+        });
+
+        // 7. Render Shockwave Rings & Speed Lines (Jump / Dodge / Vault VFX)
+        game.shockRings.forEach((sr) => {
+          ctx.save();
+          ctx.strokeStyle = sr.color;
+          ctx.globalAlpha = Math.max(0, sr.alpha);
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          if (sr.flat) {
+            ctx.ellipse(sr.x, sr.y, sr.r, sr.r * 0.32, 0, 0, Math.PI * 2);
+          } else {
+            ctx.arc(sr.x, sr.y, sr.r, 0, Math.PI * 2);
+          }
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        game.speedLines.forEach((sl) => {
+          ctx.save();
+          ctx.strokeStyle = sl.color;
+          ctx.globalAlpha = Math.max(0, sl.alpha);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(sl.x, sl.y);
+          ctx.lineTo(sl.x + sl.len, sl.y);
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        // 8. Render Sandevistan Neon Ghost Trail
+        const suitPalette = SUIT_PALETTES[saveState.suit] || SUIT_PALETTES.cyan;
+        runner.ghostTrail.forEach((g) => {
+          drawArticulatedCyberRunner(
+            g.x,
+            g.y,
+            g.state,
+            g.animPhase,
+            g.flipAngle,
+            `rgba(${suitPalette.trail}, ${g.alpha * 0.55})`,
+            `rgba(${suitPalette.trail}, ${g.alpha})`,
+            true
+          );
+        });
+
+        // 9. Render Multi-Segment Physics Holo-Scarf
+        if (runner.scarfNodes.length > 1) {
+          ctx.save();
+          ctx.strokeStyle = game.surgeActiveTimer > 0 ? '#b8ff00' : suitPalette.primary;
+          ctx.lineWidth = 4;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(runner.scarfNodes[0].x, runner.scarfNodes[0].y);
+          for (let i = 1; i < runner.scarfNodes.length; i++) {
+            ctx.lineTo(runner.scarfNodes[i].x, runner.scarfNodes[i].y);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // 10. Render Active Articulated Cyber-Runner
+        const bodyFill = '#111827';
+        const neonStroke =
+          runner.state === 'captured'
+            ? '#ff0055'
+            : game.surgeActiveTimer > 0
+            ? '#b8ff00'
+            : suitPalette.primary;
+        drawArticulatedCyberRunner(
+          runner.x,
+          runner.y,
+          runner.state,
+          runner.animPhase,
+          runner.flipAngle,
+          bodyFill,
+          neonStroke,
+          false
+        );
+
+        // 11. Render Pursuing APEX-7 Enforcer Drone & Capture Stasis Cage
+        drawPursuingEnforcer(enforcer.x, enforcer.y);
+        if (game.cinematicMode === 'capturing') {
+          drawCaptureStasisCage(runner.x, runner.y);
+        }
+
+        // 12. Render Shattered Glass Polygons, Sparks, EMP Rings & Floating Text
+        game.glassShards.forEach((g) => {
+          ctx.save();
+          ctx.translate(g.x, g.y);
+          ctx.rotate(g.rot);
+          ctx.fillStyle = `rgba(0, 243, 255, ${Math.min(0.85, g.life)})`;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, -g.size);
+          ctx.lineTo(g.size * 0.8, g.size * 0.6);
+          ctx.lineTo(-g.size * 0.7, g.size * 0.4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        game.particles.forEach((p) => {
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        ctx.globalAlpha = 1.0;
+
+        game.empWaves.forEach((w) => {
+          ctx.save();
+          ctx.strokeStyle = `rgba(0, 243, 255, ${w.alpha})`;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        game.floatingTexts.forEach((ft) => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, ft.life);
+          ctx.font = 'bold 13px Orbitron, sans-serif';
+          ctx.fillStyle = ft.color;
+          ctx.fillText(ft.text, ft.x - 35, ft.y);
+          ctx.restore();
+        });
+
+        // 13. Render Cyberpunk Neon Rain
+        if (game.sector.rain) {
+          ctx.strokeStyle = 'rgba(0, 243, 255, 0.28)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          game.rainDrops.forEach((r) => {
+            ctx.moveTo(r.x, r.y);
+            ctx.lineTo(r.x - 6, r.y + r.len);
+          });
+          ctx.stroke();
+        }
+
+        // Dodge / Vault Reflex Flash Vignette
+        if (game.dodgeFlashAlpha > 0) {
+          ctx.fillStyle = `rgba(0, 243, 255, ${game.dodgeFlashAlpha * 0.22})`;
+          ctx.fillRect(0, 0, game.width, game.height);
+        }
+
+        ctx.restore();
+      }
+
+      // --- CUSTOM ARTICULATED CYBER-RUNNER RENDERER (EXOSUIT V3) ---
+      // High-detail sculpted cyberpunk exosuit with tapered armor plates, glowing joint servos,
+      // angular Oni/Visor helmet, high-frequency katana, and ultra-low full-crouch parkour slide!
+      function drawArticulatedCyberRunner(x, y, state, phase, flipAngle, fillCol, neonCol, isGhost) {
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Helper: draws a sculpted armor segment between two joints with glowing trim & joint servos
+        function drawArmorSegment(x1, y1, x2, y2, wStart, wEnd, hasKneeGlow) {
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const len = Math.hypot(dx, dy) || 1;
+          const nx = -dy / len;
+          const ny = dx / len;
+
+          ctx.fillStyle = fillCol;
+          ctx.strokeStyle = neonCol;
+          ctx.lineWidth = isGhost ? 1.3 : 1.8;
+
+          ctx.beginPath();
+          ctx.moveTo(x1 + nx * (wStart * 0.5), y1 + ny * (wStart * 0.5));
+          ctx.lineTo(x2 + nx * (wEnd * 0.5), y2 + ny * (wEnd * 0.5));
+          ctx.lineTo(x2 - nx * (wEnd * 0.5), y2 - ny * (wEnd * 0.5));
+          ctx.lineTo(x1 - nx * (wStart * 0.5), y1 - ny * (wStart * 0.5));
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          if (!isGhost && hasKneeGlow) {
+            ctx.fillStyle = neonCol;
+            ctx.beginPath();
+            ctx.arc(x1, y1, wStart * 0.34, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        function drawBoot(fx, fy, angle, showThruster) {
+          ctx.save();
+          ctx.translate(fx, fy);
+          ctx.rotate(angle);
+          ctx.fillStyle = fillCol;
+          ctx.strokeStyle = neonCol;
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(-5, -4);
+          ctx.lineTo(11, -2);
+          ctx.lineTo(14, 3);
+          ctx.lineTo(-6, 3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          if (!isGhost && showThruster) {
+            ctx.fillStyle = '#00f3ff';
+            ctx.beginPath();
+            ctx.moveTo(-4, 3);
+            ctx.lineTo(-12, 16 + Math.random() * 9);
+            ctx.lineTo(4, 3);
+            ctx.closePath();
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        function drawCyberHelmet(hx, hy, tilt) {
+          ctx.save();
+          ctx.translate(hx, hy);
+          ctx.rotate(tilt);
+
+          // Angular Cyberpunk Helmet Shell
+          ctx.fillStyle = fillCol;
+          ctx.strokeStyle = neonCol;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-9, 6);
+          ctx.lineTo(-10, -5);
+          ctx.lineTo(-2, -12);
+          ctx.lineTo(10, -9);
+          ctx.lineTo(13, -1);
+          ctx.lineTo(8, 7);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Swept-back Aero Fin / Cyber-Antenna
+          ctx.beginPath();
+          ctx.moveTo(-4, -9);
+          ctx.lineTo(-18, -16);
+          ctx.lineTo(-9, -4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Glowing Wrap-Around Neon Visor
+          if (!isGhost) {
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = neonCol;
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(2, -4);
+            ctx.lineTo(13, -2);
+            ctx.lineTo(10, 3);
+            ctx.lineTo(1, 1);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+          ctx.restore();
+        }
+
+        // =========================================================
+        // SPECIAL POSE 1: DEEP GROUND-HUGGING PARKOUR SLIDE
+        // Hips drop to y = -9, torso bends nearly flat along the floor,
+        // lead leg extended forward, back leg tucked deep, head at y = -20!
+        // =========================================================
+        if (state === 'slide') {
+          if (!isGhost) {
+            const wakeGrad = ctx.createLinearGradient(-55, -2, 30, -2);
+            wakeGrad.addColorStop(0, 'rgba(255, 0, 127, 0)');
+            wakeGrad.addColorStop(0.6, 'rgba(255, 0, 127, 0.75)');
+            wakeGrad.addColorStop(1, 'rgba(0, 243, 255, 0.95)');
+            ctx.fillStyle = wakeGrad;
+            ctx.fillRect(-55, -5, 85, 5);
+          }
+
+          // Back leg tucked tightly underneath body
+          drawArmorSegment(-8, -9, -24, -5, 9, 7, true);
+          drawArmorSegment(-24, -5, -38, -3, 7, 5, true);
+          drawBoot(-38, -3, 0.2, true);
+
+          // Back arm trailing low for balance (hand skimming floor with sparks)
+          drawArmorSegment(-14, -15, -28, -9, 6.5, 5, true);
+          drawArmorSegment(-28, -9, -39, -3, 5, 4, false);
+
+          // High-Frequency Katana Sheath angled flat along back
+          if (!isGhost) {
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2.8;
+            ctx.beginPath();
+            ctx.moveTo(-8, -14);
+            ctx.lineTo(-42, -21);
+            ctx.stroke();
+          }
+
+          // Deep-crouched Torso (nearly horizontal, hugging the ground at y = -9 to -17)
+          ctx.fillStyle = fillCol;
+          ctx.strokeStyle = neonCol;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-8, -6);
+          ctx.lineTo(8, -11);
+          ctx.lineTo(-12, -21);
+          ctx.lineTo(-22, -13);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Glowing spine reactor nodes on horizontal torso
+          if (!isGhost) {
+            ctx.fillStyle = neonCol;
+            ctx.fillRect(-13, -16, 12, 3);
+          }
+
+          // Front Leg extended far forward skimming the ground
+          drawArmorSegment(4, -9, 22, -6, 9.5, 7.5, true);
+          drawArmorSegment(22, -6, 40, -4, 7.5, 5.5, true);
+          drawBoot(40, -4, -0.15, false);
+
+          // Front Arm tucked forward in aerodynamic guard
+          drawArmorSegment(-10, -16, 4, -14, 6.5, 5, true);
+          drawArmorSegment(4, -14, 16, -17, 5, 4.5, false);
+
+          // Head tucked down low at (-8, -22) looking forward
+          drawCyberHelmet(-6, -22, 0.12);
+
+          ctx.restore();
+          return;
+        }
+
+        // =========================================================
+        // STANDARD & AERIAL POSES (Run, Jump, Flip, Vault, Zipline, Captured)
+        // =========================================================
+        if (state === 'flip') {
+          ctx.translate(0, -44);
+          ctx.rotate(flipAngle);
+          if (!isGhost) {
+            ctx.strokeStyle = neonCol;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(0, 0, 36, 0, Math.PI * 1.4);
+            ctx.stroke();
+          }
+          ctx.translate(0, 44);
+        } else if (state === 'vault') {
+          // Horizontal acrobatic Kong-Vault body angle
+          ctx.translate(0, -34);
+          ctx.rotate(0.78);
+        } else if (state === 'captured') {
+          ctx.translate(0, -14);
+          ctx.rotate(0.22 + Math.sin(phase * 3) * 0.06);
+        }
+
+        const isRunning = state === 'run' || state === 'escaped';
+        const s1 = isRunning ? Math.sin(phase) : state === 'jump' ? 0.85 : state === 'vault' ? -0.6 : 0.35;
+        const s2 = isRunning ? Math.sin(phase + Math.PI) : state === 'jump' ? -0.55 : state === 'vault' ? 0.85 : -0.35;
+
+        const hipX = 0;
+        const hipY = -39;
+        const shoulderX = 7;
+        const shoulderY = -65;
+
+        // compute natural knee & ankle positions with proper forward knee bend
+        function getLegJoints(sVal, isJumpTuck) {
+          const thighAngle = sVal * 0.72 - (isJumpTuck ? 0.35 : 0.08);
+          const kneeBend = isRunning
+            ? Math.max(0.15, (Math.cos(phase + (sVal === s1 ? 0 : Math.PI)) + 1) * 0.58)
+            : isJumpTuck
+            ? 1.15
+            : 0.45;
+          const kx = hipX + Math.sin(thighAngle) * 19;
+          const ky = hipY + Math.cos(thighAngle) * 19;
+          const shinAngle = thighAngle - kneeBend;
+          const fx = kx + Math.sin(shinAngle) * 19;
+          const fy = ky + Math.cos(shinAngle) * 19;
+          return { kx, ky, fx, fy, shinAngle };
+        }
+
+        const backLeg = getLegJoints(s2, state === 'jump' || state === 'flip' || state === 'vault');
+        const frontLeg = getLegJoints(s1, state === 'jump' || state === 'flip');
+
+        // 1. Back Arm
+        const backArmSwing = isRunning ? s1 * 0.75 : state === 'zipline' ? -2.2 : -0.7;
+        const bElbowX = shoulderX + Math.sin(backArmSwing) * 13;
+        const bElbowY = shoulderY + Math.cos(backArmSwing) * 13;
+        const bHandX = bElbowX + Math.sin(backArmSwing + 0.85) * 12;
+        const bHandY = bElbowY + Math.cos(backArmSwing + 0.85) * 12;
+        drawArmorSegment(shoulderX, shoulderY, bElbowX, bElbowY, 6.5, 5, true);
+        drawArmorSegment(bElbowX, bElbowY, bHandX, bHandY, 5, 4, false);
+
+        // 2. Back Leg + Thruster Boot
+        const showJet = state === 'jump' || state === 'flip' || state === 'vault' || state === 'escaped';
+        drawArmorSegment(hipX, hipY, backLeg.kx, backLeg.ky, 9.5, 7, true);
+        drawArmorSegment(backLeg.kx, backLeg.ky, backLeg.fx, backLeg.fy, 7, 5, true);
+        drawBoot(backLeg.fx, backLeg.fy, -backLeg.shinAngle * 0.4, showJet);
+
+        // 3. Back-Mounted High-Frequency Katana Scabbard
+        if (!isGhost) {
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(-3, -52);
+          ctx.lineTo(-28, -82);
+          ctx.stroke();
+          ctx.strokeStyle = neonCol;
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(-3, -52);
+          ctx.lineTo(-28, -82);
+          ctx.stroke();
+        }
+
+        // 4. Sculpted Armored Exosuit Torso (Chest Plate + Tapered Waist + Spine Core)
+        ctx.fillStyle = fillCol;
+        ctx.strokeStyle = neonCol;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-6, -38);
+        ctx.lineTo(6, -38);
+        ctx.lineTo(15, -56);
+        ctx.lineTo(12, -68);
+        ctx.lineTo(-3, -67);
+        ctx.lineTo(-7, -52);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Glowing Chest Reactor Core & Spine Ribbing
+        if (!isGhost) {
+          ctx.fillStyle = neonCol;
+          ctx.beginPath();
+          ctx.arc(8, -56, 3.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillRect(-3, -61, 4, 16);
+        }
+
+        // 5. Front Leg + Thruster Boot
+        drawArmorSegment(hipX, hipY, frontLeg.kx, frontLeg.ky, 10, 7.5, true);
+        drawArmorSegment(frontLeg.kx, frontLeg.ky, frontLeg.fx, frontLeg.fy, 7.5, 5.5, true);
+        drawBoot(frontLeg.fx, frontLeg.fy, -frontLeg.shinAngle * 0.4, showJet);
+
+        // 6. Front Arm with Shoulder Pauldron
+        const frontArmSwing =
+          state === 'zipline'
+            ? -2.5
+            : state === 'vault'
+            ? 1.15
+            : isRunning
+            ? s2 * 0.78
+            : -0.55;
+        const fElbowX = shoulderX + Math.sin(frontArmSwing) * 14;
+        const fElbowY = shoulderY + Math.cos(frontArmSwing) * 14;
+        const fHandX = fElbowX + Math.sin(frontArmSwing + 0.9) * 13;
+        const fHandY = fElbowY + Math.cos(frontArmSwing + 0.9) * 13;
+        drawArmorSegment(shoulderX, shoulderY, fElbowX, fElbowY, 7.5, 5.5, true);
+        drawArmorSegment(fElbowX, fElbowY, fHandX, fHandY, 5.5, 4.5, true);
+
+        // 7. Angular Cyber-Ninja Helmet & Glowing Visor
+        drawCyberHelmet(9, -76, isRunning ? 0.14 : 0.05);
+
+        ctx.restore();
+      }
+
+      // --- DRAMATIC IN-CANVAS CAPTURE STASIS CAGE & NEURAL TETHERS ---
+      function drawCaptureStasisCage(rx, ry) {
+        ctx.save();
+        const progress = Math.min(1, (2.45 - game.cinematicTimer) / 0.8);
+
+        // 1. Multiple Crimson Neural Laser Tethers from Enforcer Drone to Runner
+        ctx.strokeStyle = '#ff0055';
+        ctx.lineWidth = 3;
+        const anchorPoints = [
+          { x: rx, y: ry - 68 },
+          { x: rx + 10, y: ry - 44 },
+          { x: rx - 8, y: ry - 22 }
+        ];
+        anchorPoints.forEach((pt, idx) => {
+          ctx.beginPath();
+          ctx.moveTo(enforcer.x + 14, enforcer.y + 4);
+          const midX = (enforcer.x + pt.x) * 0.5 + Math.sin(performance.now() * 0.03 + idx) * 14;
+          const midY = (enforcer.y + pt.y) * 0.5;
+          ctx.quadraticCurveTo(midX, midY, pt.x, pt.y);
+          ctx.stroke();
+        });
+
+        // 2. Hexagonal Crimson Energy Containment Cage around Runner
+        const cageH = 105 * progress;
+        const cageW = 68;
+        const left = rx - cageW * 0.5;
+        const top = ry - cageH;
+
+        ctx.fillStyle = 'rgba(255, 0, 85, 0.18)';
+        ctx.strokeStyle = '#ff0055';
+        ctx.lineWidth = 2.5;
+        ctx.fillRect(left, top, cageW, cageH);
+        ctx.strokeRect(left, top, cageW, cageH);
+
+        // Diagonal laser containment bars
+        ctx.strokeStyle = 'rgba(255, 170, 0, 0.75)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let y = top + 15; y < ry; y += 22) {
+          ctx.moveTo(left, y);
+          ctx.lineTo(left + cageW, y - 12);
+        }
+        ctx.stroke();
+
+        // Spinning Target-Lock Reticle over Runner
+        ctx.translate(rx, ry - 48);
+        ctx.rotate(performance.now() * 0.006);
+        ctx.strokeStyle = '#ff0055';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 44, 0, Math.PI * 1.6);
+        ctx.stroke();
+        ctx.restore();
+
+        // Flashing Warning Banner in Canvas
+        ctx.save();
+        ctx.fillStyle = 'rgba(24, 6, 18, 0.9)';
+        ctx.strokeStyle = '#ff0055';
+        ctx.lineWidth = 2;
+        const bx = game.width * 0.5 - 155;
+        const by = 55;
+        ctx.fillRect(bx, by, 310, 42);
+        ctx.strokeRect(bx, by, 310, 42);
+        ctx.fillStyle = '#ff0055';
+        ctx.font = 'bold 14px Orbitron, sans-serif';
+        ctx.fillText('⚠ STASIS CONTAINMENT LOCKED ⚠', bx + 20, by + 26);
+        ctx.restore();
+      }
+
+      // --- CUSTOM APEX-7 PURSUING ENFORCER DRONE ---
+      function drawPursuingEnforcer(x, y) {
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Sweeping Crimson Target-Lock Laser Cone
+        const coneGrad = ctx.createLinearGradient(0, 0, 195, 65);
+        coneGrad.addColorStop(0, 'rgba(255, 0, 85, 0.45)');
+        coneGrad.addColorStop(1, 'rgba(255, 0, 85, 0)');
+        ctx.fillStyle = coneGrad;
+        ctx.beginPath();
+        ctx.moveTo(16, 0);
+        ctx.lineTo(215, 35);
+        ctx.lineTo(215, 95);
+        ctx.closePath();
+        ctx.fill();
+
+        // Drone Armored Chassis & Claw Arms
+        ctx.fillStyle = '#181826';
+        ctx.strokeStyle = '#ff0055';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-26, -12);
+        ctx.lineTo(15, -17);
+        ctx.lineTo(28, 0);
+        ctx.lineTo(12, 15);
+        ctx.lineTo(-22, 11);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Top Rotor Halo
+        ctx.strokeStyle = 'rgba(0, 243, 255, 0.65)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(0, -20, 22, 4, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Glowing Crimson Eye Sensor
+        ctx.fillStyle = '#ff0055';
+        ctx.beginPath();
+        ctx.arc(15, -1, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Thruster Jet Plume
+        ctx.fillStyle = '#00f3ff';
+        ctx.beginPath();
+        ctx.moveTo(-26, -5);
+        ctx.lineTo(-46 - Math.random() * 14, 0);
+        ctx.lineTo(-26, 6);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // --- MAIN ANIMATION LOOP ---
+      function gameLoop(timestamp) {
+        const rawDt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+        const dt = Math.min(0.05, Math.max(0.001, rawDt));
+
+        if (game.running && !game.paused) {
+          updateSimulation(dt);
+        }
+        renderScene();
+
+        if (game.running) {
+          animFrameId = requestAnimationFrame(gameLoop);
+        }
+      }
+
+      // --- UI & UPGRADE SHOP HANDLERS ---
+      function syncSaveUI() {
+        menuShardsCount.textContent = saveState.shards;
+        rigShardsCount.textContent = saveState.shards;
+        hudShards.textContent = saveState.shards;
+        bestEndlessDistEl.textContent = saveState.bestEndless;
+
+        const clearedCount = getClearedCount();
+        if (menuEnclosureStatus) {
+          menuEnclosureStatus.textContent =
+            clearedCount === 4
+              ? 'ENCLOSURE STATUS: ESCAPED ★ (4/4)'
+              : `ENCLOSURE LOCKS BREACHED: ${clearedCount} / 4`;
+        }
+
+        // Update sector cards with completion checkmarks
+        document.querySelectorAll('.sector-card').forEach((card, idx) => {
+          const statusSpan = card.querySelector('.sector-status');
+          if (!statusSpan) return;
+          const isCleared = saveState.clearedSectors[idx];
+          if (idx === selectedSectorIdx) {
+            statusSpan.textContent = isCleared ? 'BREACHED ★ (SELECTED)' : 'SELECTED ✓';
+          } else {
+            statusSpan.textContent = isCleared ? 'RING BREACHED ★' : 'CLICK TO SELECT';
+          }
+        });
+
+        lvlServos.textContent = `LVL ${saveState.servosLvl}`;
+        lvlSurge.textContent = `LVL ${saveState.surgeLvl}`;
+        lvlEmp.textContent = `LVL ${saveState.empLvl}`;
+
+        const servosCost = saveState.servosLvl * 100;
+        const surgeCost = saveState.surgeLvl * 100;
+        const empCost = saveState.empLvl * 100;
+
+        btnBuyServos.textContent =
+          saveState.servosLvl >= 5 ? 'MAXED OUT' : `UPGRADE (₿ ${servosCost})`;
+        btnBuyServos.disabled = saveState.servosLvl >= 5 || saveState.shards < servosCost;
+
+        btnBuySurge.textContent =
+          saveState.surgeLvl >= 5 ? 'MAXED OUT' : `UPGRADE (₿ ${surgeCost})`;
+        btnBuySurge.disabled = saveState.surgeLvl >= 5 || saveState.shards < surgeCost;
+
+        btnBuyEmp.textContent =
+          saveState.empLvl >= 5 ? 'MAXED OUT' : `UPGRADE (₿ ${empCost})`;
+        btnBuyEmp.disabled = saveState.empLvl >= 5 || saveState.shards < empCost;
+
+        document.querySelectorAll('.suit-btn').forEach((btn) => {
+          const isSelected = btn.getAttribute('data-suit') === saveState.suit;
+          btn.classList.toggle('ring-2', isSelected);
+          btn.classList.toggle('ring-white', isSelected);
+        });
+      }
+
+      // Sector card selection
+      document.querySelectorAll('.sector-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          sound.init();
+          sound.shard();
+          selectedSectorIdx = parseInt(card.getAttribute('data-sector'), 10);
+          document.querySelectorAll('.sector-card').forEach((c, idx) => {
+            if (idx === selectedSectorIdx) {
+              c.classList.add('border-2', 'border-cyan-400');
+              c.classList.remove('border-slate-700');
+            } else {
+              c.classList.remove('border-2', 'border-cyan-400');
+              c.classList.add('border-slate-700');
+            }
+          });
+          syncSaveUI();
+        });
+      });
+
+      // Suit selector
+      document.querySelectorAll('.suit-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          sound.init();
+          sound.shard();
+          saveState.suit = btn.getAttribute('data-suit');
+          writeSave();
+          renderScene();
+        });
+      });
+
+      btnBuyServos.addEventListener('click', () => {
+        const cost = saveState.servosLvl * 100;
+        if (saveState.shards >= cost && saveState.servosLvl < 5) {
+          saveState.shards -= cost;
+          saveState.servosLvl++;
+          sound.keyPickup();
+          writeSave();
+        }
+      });
+
+      btnBuySurge.addEventListener('click', () => {
+        const cost = saveState.surgeLvl * 100;
+        if (saveState.shards >= cost && saveState.surgeLvl < 5) {
+          saveState.shards -= cost;
+          saveState.surgeLvl++;
+          sound.keyPickup();
+          writeSave();
+        }
+      });
+
+      btnBuyEmp.addEventListener('click', () => {
+        const cost = saveState.empLvl * 100;
+        if (saveState.shards >= cost && saveState.empLvl < 5) {
+          saveState.shards -= cost;
+          saveState.empLvl++;
+          sound.keyPickup();
+          writeSave();
+        }
+      });
+
+      btnStartBreach.addEventListener('click', () => {
+        startSector(selectedSectorIdx);
+      });
+
+      btnOpenRig.addEventListener('click', () => {
+        if (game.running && !game.paused) {
+          game.paused = true;
+          btnPauseToggle.textContent = 'RESUME';
+        }
+        syncSaveUI();
+        rigModal.classList.remove('hidden');
+      });
+
+      btnMenuUpgrades.addEventListener('click', () => {
+        syncSaveUI();
+        rigModal.classList.remove('hidden');
+      });
+
+      btnCloseRig.addEventListener('click', () => {
+        rigModal.classList.add('hidden');
+      });
+
+      btnPauseToggle.addEventListener('click', () => {
+        if (!game.running || game.cinematicMode) return;
+        game.paused = !game.paused;
+        btnPauseToggle.textContent = game.paused ? 'RESUME' : 'PAUSE';
+      });
+
+      btnMuteToggle.addEventListener('click', () => {
+        sound.muted = !sound.muted;
+        btnMuteToggle.textContent = sound.muted ? 'SFX: OFF' : 'SFX: ON';
+      });
+
+      btnOutcomeMenu.addEventListener('click', () => {
+        outcomeModal.classList.add('hidden');
+        menuModal.classList.remove('hidden');
+        syncSaveUI();
+      });
+
+      btnOutcomeRetry.addEventListener('click', () => {
+        startSector(selectedSectorIdx);
+      });
+
+      btnOutcomeNext.addEventListener('click', () => {
+        if (selectedSectorIdx < 3) {
+          selectedSectorIdx++;
+        }
+        startSector(selectedSectorIdx);
+      });
+
+      // Touch & On-Screen Button Listeners
+      btnTouchJump.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        actionJumpOrVault();
+      });
+      btnTouchSlide.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        actionSlide();
+      });
+      btnTouchSurge.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        actionSurge();
+      });
+      btnTouchPulse.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        actionEmpPulse();
+      });
+
+      // Swipe Gesture Support on Canvas
+      let touchStartX = 0;
+      let touchStartY = 0;
+      canvas.addEventListener('touchstart', (e) => {
+        if (!e.touches.length) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      canvas.addEventListener('touchend', (e) => {
+        if (!e.changedTouches.length) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) < 25 && Math.abs(dy) < 25) {
+          actionJumpOrVault();
+        } else if (Math.abs(dy) > Math.abs(dx)) {
+          if (dy < -25) actionJumpOrVault();
+          else if (dy > 25) actionSlide();
+        } else {
+          if (dx > 30) actionSurge();
+          else if (dx < -30) actionEmpPulse();
+        }
+      }, { passive: true });
+
+      // Keyboard Controls
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+          e.preventDefault();
+          actionJumpOrVault();
+        } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+          e.preventDefault();
+          actionSlide();
+        } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'ArrowRight' || e.code === 'KeyD') {
+          e.preventDefault();
+          actionSurge();
+        } else if (e.code === 'KeyE') {
+          e.preventDefault();
+          actionEmpPulse();
+        } else if (e.code === 'KeyP') {
+          if (game.running && !game.cinematicMode) {
+            game.paused = !game.paused;
+            btnPauseToggle.textContent = game.paused ? 'RESUME' : 'PAUSE';
+          }
+        } else if (e.code === 'Escape') {
+          rigModal.classList.add('hidden');
+        }
+      });
+
+      // --- INITIALIZE ON LOAD ---
+      window.onload = function () {
+        loadSave();
+        resizeCanvas();
+        initEnvironment();
+        renderScene();
+      };
+    })();
+  </script>
+</body>
+</html>
